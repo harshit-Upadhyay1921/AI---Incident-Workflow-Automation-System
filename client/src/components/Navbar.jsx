@@ -1,18 +1,35 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import * as Icons from "react-icons/md";
 
 const Navbar = () => {
-    const navigate = useNavigate();
-    return (
-        <div className="flex justify-between items center py-5 mx-8 sm:mx-20 xl:mx-32">
-            <div className="cursor-pointer w-34 sm:w-44 text-primary text-xl font-bold" onClick={() => navigate("/")}>IncidentIQ</div>
-            <button onClick={() => navigate("/login")} className="flex items-center gap-2 rounded-full text-sm cursor-pointer bg-primary text-white px-10 py-2.5">Login</button>
+  const { currentUser, logout } = useAuth();
+
+  return (
+    <div className="h-16 bg-white shadow-sm flex items-center justify-between px-6 border-b border-gray-200">
+
+      <h2 className="text-xl font-semibold text-primary">
+        Dashboard
+      </h2>
+
+      <div className="flex items-center gap-4">
+
+        {/* User Name */}
+        <div className="text-gray-700 font-medium">
+          {currentUser?.name}
+        </div>
+
+        {/* Logout Button */}
+        <button
+          onClick={logout}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#053B2C] transition"
+        >
+          <Icons.MdLogout size={18} />
+          Logout
+        </button>
       </div>
-    )
-}
+    </div>
+  );
+};
 
-export default Navbar
-
-
-// onClick={() => navigate('/')}
-// onClick={() => navigate('/login')}
+export default Navbar;

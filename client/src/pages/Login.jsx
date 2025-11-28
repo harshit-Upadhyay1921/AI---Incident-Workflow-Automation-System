@@ -1,65 +1,28 @@
-// import React from "react";
-// import Navbar from "../components/Navbar.jsx";
-// import Footer from "../components/Footer.jsx";
-// import { useState } from "react";
-// import { useNavigate } from "react-router-dom";
-
-// const Login = () => {
-//     const navigate = useNavigate();
-//     const [email,setEmail] = useState("");
-//     const [password,setPassword] = useState("");
-
-//     const handleSubmit = (e) => {
-//         e.preventDefault();
-//     }
-//     return (
-//         <div>
-//             <Navbar/>
-//             <div>
-//                 <div>
-//                     <h1>Get Login to get access to IncidentIQ's automated ITSM</h1>
-//                     <div>
-//                         <p>Smart automation for your enterprise</p>
-//                         <p>Auto Handling of incidents</p>
-//                         <p>Integrated webhooks for easier management</p>
-//                     </div>
-//                 </div>
-//                 <div>
-//                     <form onSubmit={handleSubmit}>
-//                         <div>
-//                             <label>Email:</label>
-//                             <input onChange={e => setEmail(e.target.value)} value={email} type="email" required placeholder="Enter your email here:"></input>
-//                         </div>
-//                         <div>
-//                             <label>Password:</label>
-//                             <input onChange={e => setPassword(e.target.value)} value={password} type="text" required placeholder="Enter your password here:" />
-//                         </div>
-//                     </form>
-//                 </div>
-//                 <div>
-//                     <p>Don't have an account? <span onClick={e => navigate("/signup")}>Create an account</span></p>
-//                 </div>
-//             </div>
-//             <Footer/>
-//         </div>
-//     )
-// }
-
-// export default Login;
 
 import React, { useState } from "react";
-import Navbar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuth } from "../context/AuthContext"
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const { login } = useAuth();
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Fake login for now
+    login({
+      name: "Admin",
+      email: email,
+      role: "admin",  // important!
+    });
+
+    navigate("/admin/dashboard");
   };
 
   return (
@@ -69,14 +32,14 @@ const Login = () => {
         {/* LEFT SIDE TEXT */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}a
+          animate={{ opacity: 1, x: 0 }} a
           transition={{ duration: 0.5 }}
           className="flex-1 space-y-6"
         >
           <h1 className="text-5xl font-bold text-primary my-10">IncidentIQ</h1>
-          <h1 className="text-3xl sm:text-5xl font-bold text-primary leading-tight">
+          <h2 className="text-3xl sm:text-5xl font-bold text-primary leading-tight">
             Get Login to access <br /> IncidentIQ’s Automated ITSM
-          </h1>
+          </h2>
 
           <div className="space-y-2 text-gray-600 text-lg">
             <p>⚡ Smart automation for your enterprise</p>
