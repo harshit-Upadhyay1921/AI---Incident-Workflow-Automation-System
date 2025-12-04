@@ -32,7 +32,7 @@ const createIncident = asyncHandler(async (req, res) => {
         assignedDept: userDept,
         escalationLevel: 0,
         nextEscalationAt: getSlaNextEscalation(priority),
-        dueAt: getSlaDueDate(priority)  // temporary; later use NLP or user-selected priority
+        dueAt: getSlaDueDate(priority) 
     });
 
     await recordAuditLog({
@@ -51,7 +51,7 @@ const createIncident = asyncHandler(async (req, res) => {
 
 })
 
-const changeAssignDeptManual = asyncHandler(async (req, res) => {   //settings //employee and admin
+const changeAssignDeptManual = asyncHandler(async (req, res) => {   //settings //creator and admin
     const { newDept } = req.body;
     const incidentId = req.params.id;
 
@@ -189,7 +189,7 @@ const closeIncident = asyncHandler(async (req, res) => {  //settings of admin &&
     )
 })
 
-const reopenIncident = asyncHandler(async (req, res) => {  //admin //settings
+const reopenIncident = asyncHandler(async (req, res) => {  //admin //settings  
     const incidentId = req.params.id;
     const incident = await Incident.findById(incidentId);
     if (!incident) throw new ApiError(400, "Incident not found!");
@@ -225,7 +225,7 @@ const reopenIncident = asyncHandler(async (req, res) => {  //admin //settings
 
 })
 
-const getAllIncidents = asyncHandler(async (req, res) => {   //incidents //admin dashboard
+const getAllIncidents = asyncHandler(async (req, res) => {   //incidents //admin dashboard  //team lead dashboard
     if (!["admin", "team_lead"].includes(req.user.role)) {
         throw new ApiError(400, "You are not authorized to access all incidents!")
     };

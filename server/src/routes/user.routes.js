@@ -11,7 +11,8 @@ import {
     getActiveAndClosedIncidents, 
     getMyAssignedIncidents, 
     getMyEscalatedOrSlaBreached, 
-    getMyResolvedOrClosedIncidents
+    getMyResolvedOrClosedIncidents,
+    getSupportDashboard
 } from "../controllers/user.controllers.js";
 
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
@@ -32,5 +33,5 @@ router.route("/getActiveCloseIncidents").get(verifyJWT,authorizeRoles("admin","t
 router.route("/getMyAssignIncidents").get(verifyJWT,authorizeRoles("support","senior_support","team_lead"),getMyAssignedIncidents);
 router.route("/getMyEscalatedOrSlaBreached").get(verifyJWT,authorizeRoles("support","senior_support","team_lead"),getMyEscalatedOrSlaBreached);
 router.route("/getMyResolveCloseIncidents").get(verifyJWT,authorizeRoles("support","senior_support","team_lead"),getMyResolvedOrClosedIncidents);
-
+router.route("/getSupportDashboard").get(verifyJWT,authorizeRoles("support","senior_support","team_lead"),getSupportDashboard);
 export default router

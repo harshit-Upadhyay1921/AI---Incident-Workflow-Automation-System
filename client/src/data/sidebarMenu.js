@@ -11,32 +11,36 @@ export const sidebarMenu = {
   team_lead: [
     { label: "Dashboard", path: "/team-lead/dashboard", icon: "MdSpaceDashboard" },
     { label: "Incidents", path: "/team-lead/incidents", icon: "MdReport" },
-    { label: "Create Incident", path: "/team-lead/incidents/create", icon: "MdAddCircle" },
+    { label: "Create Incident", path: "/team-lead/createIncident", icon: "MdAddCircle" },
+    { label: "My Incidents", path: "/team-lead/myIncidents", icon: "MdReport"},
     { label: "Users", path: "/team-lead/users", icon: "MdPeople" },
-    { label: "Settings", path: "/team-lead/settings", icon: "MdSettings" },
   ],
 
   // ---------------- SUPPORT & SENIOR SUPPORT (same menu) ----------------
   support: [
     { label: "Dashboard", path: "/support/dashboard", icon: "MdSpaceDashboard" },
-    { label: "Assigned Incidents", path: "/support/incidents/assigned", icon: "MdAssignment" },
-    { label: "Escalated Incidents", path: "/support/incidents/escalated", icon: "MdUpgrade" },
-    { label: "Resolved", path: "/support/incidents/resolved", icon: "MdDoneAll" },
-    { label: "Settings", path: "/support/settings", icon: "MdSettings" },
+    // Uses getMyAssignedIncidents controller
+    { label: "My Assigned Incidents", path: "/support/incidents/assigned", icon: "MdAssignment" },
+    // Uses getMyEscalatedOrSlaBreached controller
+    { label: "My Escalated / SLA-Breached", path: "/support/incidents/escalated", icon: "MdUpgrade" },
+    // Uses getMyResolvedOrClosedIncidents controller
+    { label: "My Resolved & Closed", path: "/support/incidents/resolved", icon: "MdDoneAll" },
   ],
 
   senior_support: [
     { label: "Dashboard", path: "/support/dashboard", icon: "MdSpaceDashboard" },
-    { label: "Assigned Incidents", path: "/support/incidents/assigned", icon: "MdAssignment" },
-    { label: "Escalated Incidents", path: "/support/incidents/escalated", icon: "MdUpgrade" },
-    { label: "Resolved", path: "/support/incidents/resolved", icon: "MdDoneAll" },
-    { label: "Settings", path: "/support/settings", icon: "MdSettings" },
+    { label: "My Assigned Incidents", path: "/support/incidents/assigned", icon: "MdAssignment" },
+    { label: "My Escalated / SLA-Breached", path: "/support/incidents/escalated", icon: "MdUpgrade" },
+    { label: "My Resolved & Closed", path: "/support/incidents/resolved", icon: "MdDoneAll" },
   ],
 
   // ---------------- EMPLOYEE ----------------
   employee: [
-    { label: "My Incidents", path: "/employee/incidents", icon: "MdReport" },
-    { label: "Create Incident", path: "/employee/incidents/create", icon: "MdAddCircle" },
+    // Uses createIncident controller (same UI as team lead create)
+    { label: "Create Incident", path: "/employee/create-incident", icon: "MdAddCircle" },
+    // Uses getAllIncidents (filtered by createdBy) or a dedicated getMyCreatedIncidents
+    { label: "My Incidents", path: "/employee/my-incidents", icon: "MdReport" },
+
     { label: "Profile", path: "/employee/profile", icon: "MdPerson" },
   ],
 };

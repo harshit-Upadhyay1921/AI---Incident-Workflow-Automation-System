@@ -27,14 +27,16 @@ const ProtectedLayout = () => {
       <Sidebar />
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 ml-[260px] overflow-auto">
+      <div className="flex-1 overflow-auto">
 
         {/* TOP HEADER */}
         <Navbar />
 
         {/* PAGE CONTENT */}
         <div className="p-6">
-          <Outlet />
+          <div className="max-w-7xl mx-auto w-full">
+            <Outlet />
+          </div>
         </div>
       </div>
 

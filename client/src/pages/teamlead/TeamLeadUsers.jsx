@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 // import axios from "axios";
 import { MdSearch, MdFilterList, MdPeople } from "react-icons/md";
 
-const AdminUsers = () => {
+const TeamLeadUsers = () => {
   const [users, setUsers] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -65,7 +65,7 @@ const AdminUsers = () => {
             _id: "4",
             name: "Priya",
             email: "priya@example.com",
-            role: "admin",
+            role: "senior_support",
             department: "IT",
             isActive: true,
             createdAt: "2025-01-20T14:30:00Z",
@@ -128,7 +128,7 @@ const AdminUsers = () => {
         className="space-y-2"
       >
         <h1 className="text-4xl font-bold text-primary">Users Management</h1>
-        <p className="text-gray-600">View and manage all users in the organization</p>
+        <p className="text-gray-600">View and manage all users in your organization</p>
       </motion.div>
 
       {/* ------------------ FILTERS ------------------ */}
@@ -355,4 +355,4 @@ const AdminUsers = () => {
   );
 };
 
-export default AdminUsers;
+export default TeamLeadUsers;

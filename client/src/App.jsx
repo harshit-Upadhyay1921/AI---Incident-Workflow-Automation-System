@@ -8,6 +8,14 @@ import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 import AdminUsers from "./pages/admin/AdminUsers.jsx";
 import AdminIncidents from "./pages/admin/AdminIncidents.jsx";
 import AdminSettings from "./pages/admin/AdminsSetting.jsx";
+import TeamLeadDashboard from "./pages/teamlead/TeamLeadDashboard.jsx";
+import TeamLeadIncidents from "./pages/teamlead/TeamLeadIncidents.jsx";
+import TeamLeadUsers from "./pages/teamlead/TeamLeadUsers.jsx";
+import TeamLeadCreateInc from "./pages/teamlead/TeamLeadCreateInc.jsx";
+import TeamLeadMyIncidents from "./pages/teamlead/TeamLeadMyIncidents.jsx";
+import SupportDashboard from "./pages/support/SupportDashboard.jsx";
+import SupportMyAssigned from "./pages/support/SupportMyAssigned.jsx";
+import IncidentDetails from "./pages/IncidentDetails.jsx";
 
 function App() {
 
@@ -17,6 +25,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+
         {/* PROTECTED PAGES */}
         <Route element={<ProtectedLayout />}>
           {/* ADMIN */}
@@ -24,9 +33,19 @@ function App() {
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/admin/incidents" element={<AdminIncidents />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
-          {/* support & employee routes later */}
+          {/* Team Lead */}
+          <Route path="/team-lead/dashboard" element={<TeamLeadDashboard/>}/>
+          <Route path="/team-lead/incidents" element={<TeamLeadIncidents/>}/>
+          <Route path="/team-lead/users" element={<TeamLeadUsers/>}/>
+          <Route path="/team-lead/createIncident" element={<TeamLeadCreateInc/>}/>
+          <Route path="/team-lead/myIncidents" element={<TeamLeadMyIncidents/>}/>
+
+          {/* SUPPORT & SENIOR SUPPORT */}
+          <Route path="/support/dashboard" element={<SupportDashboard />} />
+          <Route path="/support/incidents/assigned" element={<SupportMyAssigned />} />
 
         </Route>
+        <Route path="/incident/:id" element={<IncidentDetails/>}/>
       </Routes>
 
     </div>

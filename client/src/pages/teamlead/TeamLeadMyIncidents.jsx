@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 // import axios from "axios";
-import { MdMoreVert, MdFilterList } from "react-icons/md";
-import ActionsMenu from "../../components/ActionsMenu.jsx";
+import { MdFilterList } from "react-icons/md";
+import { useAuth } from "../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 
-const AdminIncidents = () => {
+const TeamLeadMyIncidents = () => {
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+
   const [incidents, setIncidents] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+
   const [filters, setFilters] = useState({
     status: "",
     priority: "",
     category: "",
-    createdBy: "",
     assignedTo: "",
     assignedDept: "",
     sortBy: "createdAt",
@@ -20,58 +24,69 @@ const AdminIncidents = () => {
     page: 1,
     limit: 10,
   });
-  const [openMenu, setOpenMenu] = useState(null);
-  const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
-  // ----------------- FETCH INCIDENTS -------------------
+  // ----------------- FETCH MY INCIDENTS -------------------
   const fetchIncidents = async () => {
+    if (!currentUser?._id) return;
+
     setLoading(true);
     try {
-      // TODO: Uncomment when connecting to backend
+      // NOTE:
+      // Backend controller `getAllIncidents` currently authorizes only "admin" and "team_lead".
+      // To let employees also hit this endpoint, update the authorizeRoles in backend OR
+      // create a dedicated "getMyCreatedIncidents" controller.
+      //
+      // When backend is ready, uncomment this:
+      //
       // const res = await axios.get(
       //   "http://localhost:8000/api/v1/incidents/getAllIncidents",
-      //   { params: filters, withCredentials: true }
+      //   {
+      //     params: {
+      //       ...filters,
+      //       createdBy: currentUser._id, // ensure we only get incidents created by this user
+      //     },
+      //     withCredentials: true,
+      //   }
       // );
-      // setIncidents(res.data.data.incidents);
-      // setTotalPages(res.data.data.totalPages);
+      //
+      // const data = res.data.data;
+      // setIncidents(data.incidents);
+      // setTotalPages(data.totalPages);
 
-      // ----------------- DUMMY DATA (Matches backend schema) -------------------
+      // ----------------- DUMMY DATA (shape matches backend) -------------------
       const dummy = {
         incidents: [
           {
-            _id: "101",
-            title: "System freeze on login",
-            category: "software",
-            priority: "critical",
+            _id: "201",
+            title: "Laptop not booting",
+            category: "hardware",
+            priority: "high",
             status: "open",
-            createdBy: { name: "Harshit", email: "harshit@example.com" },
-            assignedTo: { name: "Support Agent", email: "support@example.com" },
+            assignedTo: { name: "Support Agent 1", email: "support1@example.com" },
             assignedDept: "IT",
-            createdAt: "2025-01-20T10:00:00Z",
-            updatedAt: "2025-01-21T12:00:00Z",
+            createdAt: "2025-02-01T09:00:00Z",
+            updatedAt: "2025-02-01T09:15:00Z",
           },
           {
-            _id: "102",
-            title: "VPN not connecting",
+            _id: "202",
+            title: "VPN disconnects frequently",
             category: "network",
-            priority: "high",
+            priority: "medium",
             status: "in-progress",
-            createdBy: { name: "Aman", email: "aman@example.com" },
-            assignedTo: { name: "Senior Support", email: "senior@example.com" },
-            assignedDept: "HR",
-            createdAt: "2025-01-22T09:20:00Z",
-            updatedAt: "2025-01-23T14:05:00Z",
+            assignedTo: { name: "Support Agent 2", email: "support2@example.com" },
+            assignedDept: "IT",
+            createdAt: "2025-02-02T11:30:00Z",
+            updatedAt: "2025-02-02T12:10:00Z",
           },
         ],
-        totalPages: 6,
+        totalPages: 1,
       };
 
       setIncidents(dummy.incidents);
       setTotalPages(dummy.totalPages);
     } catch (error) {
-      console.error("Fetch Incidents Error:", error);
-      alert("Failed to load incidents!");
+      console.error("My Incidents Fetch Error:", error);
+      alert(error.response?.data?.message || "Failed to load incidents!");
     } finally {
       setLoading(false);
     }
@@ -79,7 +94,8 @@ const AdminIncidents = () => {
 
   useEffect(() => {
     fetchIncidents();
-  }, [filters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, currentUser?._id]);
 
   const handleFilter = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
@@ -135,8 +151,10 @@ const AdminIncidents = () => {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-2"
       >
-        <h1 className="text-4xl font-bold text-primary">Incidents Management</h1>
-        <p className="text-gray-600">View and manage all incidents across the organization</p>
+        <h1 className="text-4xl font-bold text-primary">My Incidents</h1>
+        <p className="text-gray-600">
+          Incidents created by you. Use filters to quickly find specific records.
+        </p>
       </motion.div>
 
       {/* ---------------- FILTER BAR ---------------- */}
@@ -149,8 +167,8 @@ const AdminIncidents = () => {
           <MdFilterList className="text-primary text-xl" />
           <h2 className="text-lg font-semibold text-gray-800">Filters</h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {/* STATUS */}
           <Select
             label="Status"
@@ -175,14 +193,7 @@ const AdminIncidents = () => {
             options={["software", "hardware", "network", "other"]}
           />
 
-          {/* CREATED BY */}
-          <Input
-            label="Created By"
-            value={filters.createdBy}
-            onChange={(v) => handleFilter("createdBy", v)}
-          />
-
-          {/* ASSIGNED TO */}
+          {/* ASSIGNED TO (optional text filter) */}
           <Input
             label="Assigned To"
             value={filters.assignedTo}
@@ -224,8 +235,10 @@ const AdminIncidents = () => {
         className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
       >
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-primary">All Incidents</h2>
-          <p className="text-sm text-gray-500 mt-1">Total: {incidents.length} incidents</p>
+          <h2 className="text-lg font-semibold text-primary">Incidents Created by You</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Total: {incidents.length} incident{incidents.length !== 1 ? "s" : ""}
+          </p>
         </div>
 
         {loading ? (
@@ -244,10 +257,10 @@ const AdminIncidents = () => {
                   <th className="px-6 py-4 font-semibold text-gray-700">Category</th>
                   <th className="px-6 py-4 font-semibold text-gray-700">Priority</th>
                   <th className="px-6 py-4 font-semibold text-gray-700">Status</th>
-                  <th className="px-6 py-4 font-semibold text-gray-700">Created By</th>
                   <th className="px-6 py-4 font-semibold text-gray-700">Assigned To</th>
                   <th className="px-6 py-4 font-semibold text-gray-700">Dept</th>
                   <th className="px-6 py-4 font-semibold text-gray-700">Created At</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700">Last Updated</th>
                   <th className="px-6 py-4 font-semibold text-gray-700 text-center">Actions</th>
                 </tr>
               </thead>
@@ -255,10 +268,10 @@ const AdminIncidents = () => {
               <tbody className="divide-y divide-gray-200">
                 {incidents.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="text-center py-12 text-gray-500">
+                    <td colSpan={8} className="text-center py-12 text-gray-500">
                       <div className="flex flex-col items-center gap-2">
                         <span className="text-4xl">📭</span>
-                        <p>No incidents found</p>
+                        <p>No incidents found. Create a new one from the Create Incident page.</p>
                       </div>
                     </td>
                   </tr>
@@ -266,7 +279,7 @@ const AdminIncidents = () => {
                   incidents.map((inc) => (
                     <tr key={inc._id} className="hover:bg-gray-50 transition">
                       <td className="px-6 py-4">
-                        <button onClick={() => navigate(`/incident/${inc._id}`)} className="font-medium text-gray-900 hover:underline text-left w-full">{inc.title}</button>
+                        <button onClick={() => navigate(`/incident/${inc._id}`)} classname="font-medium text-gray-900 hover:underline text-left w-full">{inc.title}</button>
                       </td>
                       <td className="px-6 py-4">
                         <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700 capitalize">
@@ -274,17 +287,22 @@ const AdminIncidents = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 text-xs rounded-full capitalize ${getPriorityColor(inc.priority)}`}>
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full capitalize ${getPriorityColor(
+                            inc.priority
+                          )}`}
+                        >
                           {inc.priority}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 text-xs rounded-full capitalize ${getStatusColor(inc.status)}`}>
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full capitalize ${getStatusColor(
+                            inc.status
+                          )}`}
+                        >
                           {inc.status}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 text-gray-700">
-                        {typeof inc.createdBy === "object" ? inc.createdBy.name : inc.createdBy}
                       </td>
                       <td className="px-6 py-4 text-gray-700">
                         {typeof inc.assignedTo === "object" ? inc.assignedTo.name : inc.assignedTo}
@@ -297,19 +315,47 @@ const AdminIncidents = () => {
                       <td className="px-6 py-4 text-gray-600 text-xs">
                         {formatDate(inc.createdAt)}
                       </td>
-                      <td className="px-6 py-4 text-center relative">
-                        <button
-                          className="p-2 hover:bg-gray-100 rounded-full transition"
-                          onClick={() => setOpenMenu(openMenu === inc._id ? null : inc._id)}
-                        >
-                          <MdMoreVert size={20} className="text-gray-600" />
-                        </button>
-                        {openMenu === inc._id && (
-                          <ActionsMenu
-                            incident={inc}
-                            onClose={() => setOpenMenu(null)}
-                          />
-                        )}
+                      <td className="px-6 py-4 text-gray-600 text-xs">
+                        {formatDate(inc.updatedAt)}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="inline-flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/incidents/${inc._id}/history`)}
+                            className="px-3 py-1.5 text-xs border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+                          >
+                            View History
+                          </button>
+                          <button
+                            type="button"
+                            // disabled={inc.status !== "resolved"}
+                            onClick={async () => {
+                              // TODO: Uncomment when connecting to backend.
+                              // Only creator (or admin) can close; backend enforces this in closeIncident.
+                              // For non-admin users, incident must be in "resolved" status, otherwise
+                              // backend will return 400.
+                              //
+                              // try {
+                              //   await axios.post(
+                              //     `http://localhost:8000/api/v1/incidents/closeIncident/${inc._id}`,
+                              //     {},
+                              //     { withCredentials: true }
+                              //   );
+                              //   alert("Incident closed successfully!");
+                              //   fetchIncidents();
+                              // } catch (error) {
+                              //   console.error("Close Incident Error:", error);
+                              //   alert(error.response?.data?.message || "Failed to close incident!");
+                              // }
+
+                              alert("Close Incident API placeholder (will use closeIncident controller)");
+                            }}
+                            className="px-3 py-1.5 text-xs rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Close Incident
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -329,8 +375,6 @@ const AdminIncidents = () => {
     </div>
   );
 };
-
-export default AdminIncidents;
 
 /* ---------------------- REUSABLE COMPONENTS ----------------------- */
 
@@ -398,3 +442,7 @@ const Pagination = ({ totalPages, page, onPage }) => (
     </button>
   </div>
 );
+
+export default TeamLeadMyIncidents;
+
+

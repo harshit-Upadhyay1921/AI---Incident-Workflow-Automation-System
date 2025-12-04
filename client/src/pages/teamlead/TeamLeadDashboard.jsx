@@ -16,7 +16,7 @@ import {
 
 const COLORS = ["#064E3B", "#0D765A", "#10A37F", "#14B08A"];
 
-const AdminDashboard = () => {
+const TeamLeadDashboard = () => {
   const [overview, setOverview] = useState(null);
   const [priorityCount, setPriorityCount] = useState(null);
   const [avgResolutionTime, setAvgResolutionTime] = useState(null);
@@ -131,8 +131,8 @@ const AdminDashboard = () => {
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* PAGE HEADER */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
-        <h1 className="text-4xl font-bold text-primary">Admin Dashboard</h1>
-        <p className="text-gray-600">Complete overview of incidents and system performance</p>
+        <h1 className="text-4xl font-bold text-primary">Team Lead Dashboard</h1>
+        <p className="text-gray-600">Overview of incidents and team performance</p>
       </motion.div>
 
       {/* STATISTICS CARDS */}
@@ -262,4 +262,4 @@ const ChartCard = ({ title, children }) => (
   </motion.div>
 );
 
-export default AdminDashboard;
+export default TeamLeadDashboard;

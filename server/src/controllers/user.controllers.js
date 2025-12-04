@@ -353,7 +353,83 @@ const getMyResolvedOrClosedIncidents = asyncHandler(async (req, res) => {
 
 // const getRecentResolved ??
 
-export { getAllUsers, updatePassword, changeRole, assignDepartment, getOverview, getCountByPriority, getAvgResolutionTime, getActiveAndClosedIncidents, getMyAssignedIncidents, getMyEscalatedOrSlaBreached, getMyResolvedOrClosedIncidents } 
+const getSupportDashboard = asyncHandler(async (req, res) => {
+    if (!["support", "senior_support", "team_lead"].includes(req.user.role)) {
+      throw new ApiError(400, "You are not authorised to view support dashboard data");
+    }
+  
+    const userId = req.user._id;
+    const now = new Date();
+    const baseQuery = { assignedTo: userId };
+  
+    const [
+      assignedToMe,
+      inProgress,
+      resolved,
+      slaBreached,
+      byPriorityAgg,
+      byCategoryAgg,
+      resolvedTrendAgg,
+    ] = await Promise.all([
+      Incident.countDocuments(baseQuery),
+      Incident.countDocuments({ ...baseQuery, status: "in-progress" }),
+      Incident.countDocuments({ ...baseQuery, status: "resolved" }),
+      Incident.countDocuments({
+        ...baseQuery,
+        dueAt: { $lt: now },
+        status: { $ne: "closed" },
+      }),
+      Incident.aggregate([
+        { $match: baseQuery },
+        { $group: { _id: "$priority", count: { $sum: 1 } } },
+      ]),
+      Incident.aggregate([
+        { $match: baseQuery },
+        { $group: { _id: "$category", count: { $sum: 1 } } },
+      ]),
+      Incident.aggregate([
+        {
+          $match: {
+            ...baseQuery,
+            status: { $in: ["resolved", "closed"] },
+            resolvedAt: { $exists: true },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: "$resolvedAt" },
+              week: { $isoWeek: "$resolvedAt" },
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { "_id.year": 1, "_id.week": 1 } },
+      ]),
+    ]);
+  
+    const byPriority = byPriorityAgg.map(p => ({ name: p._id || "unknown", value: p.count }));
+    const byCategory = byCategoryAgg.map(c => ({ name: c._id || "unknown", value: c.count }));
+    const resolvedTrend = resolvedTrendAgg.map(r => ({
+      week: `${r._id.year}-W${String(r._id.week).padStart(2, "0")}`,
+      count: r.count,
+    }));
+  
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          kpis: { assignedToMe, inProgress, resolved, slaBreached },
+          byPriority,
+          byCategory,
+          resolvedTrend,
+        },
+        "Support dashboard data fetched successfully!"
+      )
+    );
+  });
+
+export { getAllUsers, updatePassword, changeRole, assignDepartment, getOverview, getCountByPriority, getAvgResolutionTime, getActiveAndClosedIncidents, getMyAssignedIncidents, getMyEscalatedOrSlaBreached, getMyResolvedOrClosedIncidents, getSupportDashboard } 
 
 
 
