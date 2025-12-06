@@ -24,7 +24,7 @@ export const sidebarMenu = {
     // Uses getMyEscalatedOrSlaBreached controller
     { label: "My Escalated / SLA-Breached", path: "/support/incidents/escalated", icon: "MdUpgrade" },
     // Uses getMyResolvedOrClosedIncidents controller
-    { label: "My Resolved & Closed", path: "/support/incidents/resolved", icon: "MdDoneAll" },
+    { label: "My Resolved & Closed", path: "/support/incidents/resolved-closed", icon: "MdDoneAll" },
   ],
 
   senior_support: [

@@ -17,12 +17,13 @@ const Login = () => {
 
     // Fake login for now
     login({
-      name: "team_lead",
+      name: "Harshit",
       email: email,
-      role: "support",  // important!
+      role: "employee",  // important!
     });
 
-    navigate("/support/dashboard");
+    // navigate("/support/dashboard");
+    navigate("/employee/my-incidents");
   };
 
   return (

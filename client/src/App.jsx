@@ -16,6 +16,10 @@ import TeamLeadMyIncidents from "./pages/teamlead/TeamLeadMyIncidents.jsx";
 import SupportDashboard from "./pages/support/SupportDashboard.jsx";
 import SupportMyAssigned from "./pages/support/SupportMyAssigned.jsx";
 import IncidentDetails from "./pages/IncidentDetails.jsx";
+import SupportMyEscalated from "./pages/support/SupportMyEscalated.jsx";
+import SupportMyResolvedAndClosed from "./pages/support/SupportMyResolvedAndClosed.jsx";
+import EmployeeMyIncidents from "./pages/employee/EmployeeMyIncidents.jsx"; 
+import EmployeeCreateIncident from "./pages/employee/EmployeeCreateIncident.jsx";
 
 function App() {
 
@@ -39,11 +43,14 @@ function App() {
           <Route path="/team-lead/users" element={<TeamLeadUsers/>}/>
           <Route path="/team-lead/createIncident" element={<TeamLeadCreateInc/>}/>
           <Route path="/team-lead/myIncidents" element={<TeamLeadMyIncidents/>}/>
-
           {/* SUPPORT & SENIOR SUPPORT */}
           <Route path="/support/dashboard" element={<SupportDashboard />} />
           <Route path="/support/incidents/assigned" element={<SupportMyAssigned />} />
-
+          <Route path="/support/incidents/escalated" element={<SupportMyEscalated />} />
+          <Route path="/support/incidents/resolved-closed" element={<SupportMyResolvedAndClosed />} />
+          {/* Employee */}
+          <Route path="/employee/my-incidents" element={<EmployeeMyIncidents/>}/>
+          <Route path="/employee/create-incident" element={<EmployeeCreateIncident/>}/>
         </Route>
         <Route path="/incident/:id" element={<IncidentDetails/>}/>
       </Routes>
