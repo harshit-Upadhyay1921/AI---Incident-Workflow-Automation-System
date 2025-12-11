@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import Footer from "../components/Footer.jsx";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useAuth } from "../context/AuthContext"
+import { useAuth } from "../context/AuthContext";
+import api from "../api/api.js";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,18 +13,29 @@ const Login = () => {
 
   const { login } = useAuth();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Fake login for now
-    login({
-      name: "Harshit",
-      email: email,
-      role: "employee",  // important!
-    });
+    try {
+      const res = await api.post("/v1/auth/login", {
+        email,
+        password,
+      });
 
-    // navigate("/support/dashboard");
-    navigate("/employee/my-incidents");
+      // Backend should return user object
+      const user = res.data.data;
+
+      login(user);
+
+      if(user.role === "senior_support"){ 
+        navigate("/support/dashboard");
+      }
+      else navigate(`/${user.role}/dashboard`);
+    }
+    catch (error) {
+      console.error("Login failed:", error);
+      alert("Invalid email or password!");
+    }
   };
 
   return (

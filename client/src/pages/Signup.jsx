@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import Footer from "../components/Footer.jsx";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-
+import api from "../api/api.js";
+import { useAuth } from "../context/AuthContext.jsx";
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -11,7 +12,38 @@ const Signup = () => {
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
+  const { login } = useAuth();
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await api.post("/v1/auth/register", {
+        name,
+        email,
+        role,
+        department,
+        password
+      });
+
+      const user = res.data.data;
+
+      login(user);
+
+      if (user.role === "employee") {
+        navigate("/employee/my-incidents");
+      }else if(user.role === "senior_support"){
+        navigate("/support/dashboard");
+      }
+      else {
+        navigate(`/${user.role}/dashboard`);
+      }
+    } catch (error) {
+      console.error("Registration failed:", error);
+      alert("Somethin went wrong!");
+    }
+
+  }
   return (
     <div className="min-h-screen flex flex-col">
 
@@ -67,7 +99,7 @@ const Signup = () => {
             </p>
 
             {/* FORM */}
-            <form className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5">
 
               {/* NAME */}
               <div className="flex flex-col gap-1">

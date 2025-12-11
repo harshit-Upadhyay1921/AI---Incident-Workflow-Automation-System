@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-// import axios from "axios";
+import api from "../../api/api.js";
 import { MdSearch, MdFilterList, MdPeople } from "react-icons/md";
+
 
 const TeamLeadUsers = () => {
   const [users, setUsers] = useState([]);
@@ -23,59 +24,23 @@ const TeamLeadUsers = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      // TODO: Uncomment when connecting to backend
-      // const res = await axios.get(
-      //   "http://localhost:8000/api/v1/users/getAllUsers",
-      //   { params: filters, withCredentials: true }
-      // );
-      // setUsers(res.data.data.users);
-      // setTotalPages(res.data.data.totalPages);
+      const res = await api.get("/v1/users/getAllUsers", {
+        params: {
+          role: filters.role || undefined,
+          department: filters.department || undefined,
+          isActive: filters.isActive || undefined,
+          search: filters.search || undefined,
+          sortBy: filters.sortBy,
+          order: filters.order,
+          page: filters.page,
+          limit: filters.limit,
+        },
+      })
 
-      // ---- DUMMY DATA (matching backend schema) ----
-      const dummyResponse = {
-        users: [
-          {
-            _id: "1",
-            name: "Harshit",
-            email: "harshit@example.com",
-            role: "employee",
-            department: "IT",
-            isActive: true,
-            createdAt: "2025-01-12T10:00:00Z",
-          },
-          {
-            _id: "2",
-            name: "Aman",
-            email: "aman@example.com",
-            role: "support",
-            department: "HR",
-            isActive: false,
-            createdAt: "2025-01-15T09:20:00Z",
-          },
-          {
-            _id: "3",
-            name: "Rohit",
-            email: "rohit@example.com",
-            role: "team_lead",
-            department: "IT",
-            isActive: true,
-            createdAt: "2025-01-18T12:10:00Z",
-          },
-          {
-            _id: "4",
-            name: "Priya",
-            email: "priya@example.com",
-            role: "senior_support",
-            department: "IT",
-            isActive: true,
-            createdAt: "2025-01-20T14:30:00Z",
-          },
-        ],
-        totalPages: 3,
-      };
+      const user = res.data.data;
+      setUsers(user.users);
+      setTotalPages(user.totalPages);
 
-      setUsers(dummyResponse.users);
-      setTotalPages(dummyResponse.totalPages);
     } catch (error) {
       console.error("User Fetch Error:", error);
       alert("Failed to load users!");
@@ -330,11 +295,10 @@ const TeamLeadUsers = () => {
                   <button
                     key={pageNum}
                     onClick={() => handlePageChange(pageNum)}
-                    className={`px-4 py-2 rounded-lg border transition ${
-                      filters.page === pageNum
+                    className={`px-4 py-2 rounded-lg border transition ${filters.page === pageNum
                         ? "bg-primary text-white border-primary"
                         : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                    }`}
+                      }`}
                   >
                     {pageNum}
                   </button>

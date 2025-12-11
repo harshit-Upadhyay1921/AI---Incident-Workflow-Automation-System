@@ -38,11 +38,11 @@ function App() {
           <Route path="/admin/incidents" element={<AdminIncidents />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
           {/* Team Lead */}
-          <Route path="/team-lead/dashboard" element={<TeamLeadDashboard/>}/>
-          <Route path="/team-lead/incidents" element={<TeamLeadIncidents/>}/>
-          <Route path="/team-lead/users" element={<TeamLeadUsers/>}/>
-          <Route path="/team-lead/createIncident" element={<TeamLeadCreateInc/>}/>
-          <Route path="/team-lead/myIncidents" element={<TeamLeadMyIncidents/>}/>
+          <Route path="/team_lead/dashboard" element={<TeamLeadDashboard/>}/>
+          <Route path="/team_lead/incidents" element={<TeamLeadIncidents/>}/>
+          <Route path="/team_lead/users" element={<TeamLeadUsers/>}/>
+          <Route path="/team_lead/createIncident" element={<TeamLeadCreateInc/>}/>
+          <Route path="/team_lead/myIncidents" element={<TeamLeadMyIncidents/>}/>
           {/* SUPPORT & SENIOR SUPPORT */}
           <Route path="/support/dashboard" element={<SupportDashboard />} />
           <Route path="/support/incidents/assigned" element={<SupportMyAssigned />} />

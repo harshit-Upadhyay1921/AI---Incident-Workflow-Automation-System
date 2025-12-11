@@ -9,11 +9,11 @@ export const sidebarMenu = {
 
   // ---------------- TEAM LEAD ----------------
   team_lead: [
-    { label: "Dashboard", path: "/team-lead/dashboard", icon: "MdSpaceDashboard" },
-    { label: "Incidents", path: "/team-lead/incidents", icon: "MdReport" },
-    { label: "Create Incident", path: "/team-lead/createIncident", icon: "MdAddCircle" },
-    { label: "My Incidents", path: "/team-lead/myIncidents", icon: "MdReport"},
-    { label: "Users", path: "/team-lead/users", icon: "MdPeople" },
+    { label: "Dashboard", path: "/team_lead/dashboard", icon: "MdSpaceDashboard" },
+    { label: "Incidents", path: "/team_lead/incidents", icon: "MdReport" },
+    { label: "Create Incident", path: "/team_lead/createIncident", icon: "MdAddCircle" },
+    { label: "My Incidents", path: "/team_lead/myIncidents", icon: "MdReport"},
+    { label: "Users", path: "/team_lead/users", icon: "MdPeople" },
   ],
 
   // ---------------- SUPPORT & SENIOR SUPPORT (same menu) ----------------
@@ -31,7 +31,7 @@ export const sidebarMenu = {
     { label: "Dashboard", path: "/support/dashboard", icon: "MdSpaceDashboard" },
     { label: "My Assigned Incidents", path: "/support/incidents/assigned", icon: "MdAssignment" },
     { label: "My Escalated / SLA-Breached", path: "/support/incidents/escalated", icon: "MdUpgrade" },
-    { label: "My Resolved & Closed", path: "/support/incidents/resolved", icon: "MdDoneAll" },
+    { label: "My Resolved & Closed", path: "/support/incidents/resolved-closed", icon: "MdDoneAll" },
   ],
 
   // ---------------- EMPLOYEE ----------------
