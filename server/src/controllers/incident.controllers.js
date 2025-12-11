@@ -9,7 +9,7 @@ import { sendSlackNotification } from "../utils/sendSlackNotification.js";
 import { classifyIncident } from "../utils/classifyIncident.js";
 import { AuditLog } from "../models/auditLog.models.js";
 
-const createIncident = asyncHandler(async (req, res) => {
+const autoClassifyIncident = asyncHandler(async (req, res) => {
     const { title, description } = req.body
     if (!title || !description) throw new ApiError(400, "All fields are required!");
 
@@ -19,7 +19,31 @@ const createIncident = asyncHandler(async (req, res) => {
 
     let assignedTo = await getLeastLoadedSupportAgent("support", userDept);
 
-    const {category, priority, status} = await classifyIncident(title,description);
+    const { category, priority, status } = await classifyIncident(title, description);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {
+                title,
+                description,
+                category,
+                priority,
+                status,
+                createdBy: userId,
+                assignedTo,
+                assignedDept: userDept,
+                escalationLevel: 0,
+                nextEscalationAt: getSlaNextEscalation(priority),
+                dueAt: getSlaDueDate(priority)
+            },
+            "Incident classified successfully!"
+        )
+    )
+})
+const createIncident = asyncHandler(async (req, res) => {
+    const { title, description, category, priority, status, assignedTo, assignedDept, nextEscalationAt, dueAt } = req.body
+    if ([title, description, category, priority, status, assignedTo, assignedDept, nextEscalationAt, dueAt].some((field) => field.trim() === "")) throw new ApiError(400, "All fields are required!");
 
     const createdIncident = await Incident.create({
         title,
@@ -27,12 +51,12 @@ const createIncident = asyncHandler(async (req, res) => {
         category,
         priority,
         status,
-        createdBy: userId,
+        createdBy: req.user._id,
         assignedTo,
-        assignedDept: userDept,
+        assignedDept,
         escalationLevel: 0,
-        nextEscalationAt: getSlaNextEscalation(priority),
-        dueAt: getSlaDueDate(priority) 
+        nextEscalationAt,
+        dueAt
     });
 
     await recordAuditLog({
@@ -70,7 +94,7 @@ const changeAssignDeptManual = asyncHandler(async (req, res) => {   //settings /
     const before = incident.toObject();
 
     incident.assignedDept = newDept;
-    incident.assignedTo = await getLeastLoadedSupportAgent("support",newDept);
+    incident.assignedTo = await getLeastLoadedSupportAgent("support", newDept);
     incident.escalationLevel = 0;
     incident.nextEscalationAt = null;
     incident.dueAt = null;
@@ -167,7 +191,7 @@ const closeIncident = asyncHandler(async (req, res) => {  //settings of admin &&
     if (req.user._id.toString() !== incident.createdBy.toString() && req.user.role !== "admin") {
         throw new ApiError(403, "You are not authroized to close incident!");
     }
-    if(incident.status === "closed") throw new ApiError(400,"Incident already closed!");
+    if (incident.status === "closed") throw new ApiError(400, "Incident already closed!");
     if (incident.status !== "resolved" && req.user.role !== "admin") {
         throw new ApiError(400, "Incident must be resolved before closing!");
     }
@@ -247,12 +271,12 @@ const getAllIncidents = asyncHandler(async (req, res) => {   //incidents //admin
 
     const query = {};
 
-    if(status) query.status=status;
-    if(priority) query.priority=priority;
-    if(category) query.category=category;
-    if(createdBy) query.createdBy=createdBy;
-    if(assignedDept) query.assignedDept=assignedDept;
-    if(assignedTo) query.assignedTo=assignedTo;
+    if (status) query.status = status;
+    if (priority) query.priority = priority;
+    if (category) query.category = category;
+    if (createdBy) query.createdBy = createdBy;
+    if (assignedDept) query.assignedDept = assignedDept;
+    if (assignedTo) query.assignedTo = assignedTo;
 
     //date range filtering
     // if(createdFrom || createdTo){
@@ -262,49 +286,94 @@ const getAllIncidents = asyncHandler(async (req, res) => {   //incidents //admin
     // };
 
     const incidents = await Incident.find(query)
-                                    .sort({[sortBy]: order==="asc" ? 1:-1})
-                                    .skip((page-1)*limit)
-                                    .limit(Number(limit));
+        .sort({ [sortBy]: order === "asc" ? 1 : -1 })
+        .skip((page - 1) * limit)
+        .limit(Number(limit));
 
     const total = await Incident.countDocuments(query);
 
     return res.status(200).json(
         new ApiResponse(200,
-                        {
-                            incidents,
-                            total,
-                            currentPage: Number(page),
-                            totalPages: Math.ceil(total/limit)
-                        },
-                        "Filtered incidents fetched successfully")
+            {
+                incidents,
+                total,
+                currentPage: Number(page),
+                totalPages: Math.ceil(total / limit)
+            },
+            "Filtered incidents fetched successfully")
     );
-                    
+
 })
 
-const getIncidentHistory = asyncHandler(async (req,res) => {
-    const incidentId = req.params.id;
-    if(!incidentId) throw new ApiError(400,"Incident id is required!");
+const getMyCreatedIncidents = asyncHandler(async (req, res) => {
+    const {
+        status,
+        priority,
+        category,
+        assignedTo,
+        assignedDept,
+        page = 1,
+        limit = 10,
+        sortBy = "createdAt",
+        order = "desc",
+    } = req.query;
 
-    const incident = await Incident.findById(incidentId);
-    if(!incident) throw new ApiError(404,"Incident not found!");
+    const query = {};
+    query.createdBy = req.user._id;
 
-    const isAdminOrTeamlead = ["admin","team_lead"].includes(req.user.role);
-    const isCreatorOrAssignee = req.user._id.toString() === incident.createdBy.toString() || req.user._id.toString() === incident.assignedTo.toString();
+    if (status) query.status = status;
+    if (priority) query.priority = priority;
+    if (category) query.category = category;
+    if (assignedDept) query.assignedDept = assignedDept;
+    if (assignedTo) query.assignedTo = assignedTo;
 
-    if(!isAdminOrTeamlead && !isCreatorOrAssignee){
-        throw new ApiError(400,"You are not authorized to view the history")
-    };
+    const myIncidents = await Incident.find(query)
+        .sort({ [sortBy]: order === "asc" ? 1 : -1 })
+        .skip((page - 1) * limit)
+        .limit(Number(limit));
 
-    const incidentHistory = await AuditLog.find({incidentId})
-            .populate("changedBy","name role")
-            .sort({createdAt: 1}); 
+    const total = await Incident.countDocuments(query);
 
     return res.status(200).json(
-        new ApiResponse(200,incidentHistory,"incident history fetched successfully!")
+        new ApiResponse(
+            200,
+            {
+                myIncidents,
+                total,
+                totalPages: Math.ceil(total / limit),
+                currentPage: Number(page)
+            },
+            "My created Incidents fetched successfully!"
+        )
+    )
+
+
+})
+
+const getIncidentHistory = asyncHandler(async (req, res) => {
+    const incidentId = req.params.id;
+    if (!incidentId) throw new ApiError(400, "Incident id is required!");
+
+    const incident = await Incident.findById(incidentId);
+    if (!incident) throw new ApiError(404, "Incident not found!");
+
+    const isAdminOrTeamlead = ["admin", "team_lead"].includes(req.user.role);
+    const isCreatorOrAssignee = req.user._id.toString() === incident.createdBy.toString() || req.user._id.toString() === incident.assignedTo.toString();
+
+    if (!isAdminOrTeamlead && !isCreatorOrAssignee) {
+        throw new ApiError(400, "You are not authorized to view the history")
+    };
+
+    const incidentHistory = await AuditLog.find({ incidentId })
+        .populate("changedBy", "name role")
+        .sort({ createdAt: 1 });
+
+    return res.status(200).json(
+        new ApiResponse(200, incidentHistory, "incident history fetched successfully!")
     );
 })
 
-export { createIncident, changeAssignDeptManual, updateIncidentStatus, markResolved, closeIncident, reopenIncident, getAllIncidents, getIncidentHistory }
+export { autoClassifyIncident, createIncident, changeAssignDeptManual, updateIncidentStatus, markResolved, closeIncident, reopenIncident, getAllIncidents, getMyCreatedIncidents, getIncidentHistory }
 //we have to build this controller also in this for admins to manually change priority, descp, etc in case of if SLA recalculation needed.
 
 // 1️⃣ Do we need an “Update Incident” controller?

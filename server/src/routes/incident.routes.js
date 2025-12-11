@@ -1,5 +1,6 @@
 import {Router} from "express";
 import {
+    autoClassifyIncident,
     createIncident, 
     changeAssignDeptManual, 
     updateIncidentStatus, 
@@ -7,6 +8,7 @@ import {
     closeIncident, 
     reopenIncident, 
     getAllIncidents, 
+    getMyCreatedIncidents,
     getIncidentHistory
 } from "../controllers/incident.controllers.js";
 
@@ -15,6 +17,7 @@ import { authorizeRoles } from "../middlewares/authorizeRoles.middlewares.js";
 
 const router = Router();
 
+router.route("/autoClassifyIncident").post(verifyJWT,autoClassifyIncident);
 router.route("/createIncident").post(verifyJWT,createIncident);
 router.route("/changeAssignDeptManual/:id").post(verifyJWT,changeAssignDeptManual);
 router.route("/updateIncStatus/:id").post(verifyJWT,updateIncidentStatus);
@@ -23,5 +26,6 @@ router.route("/closeIncident/:id").post(verifyJWT,closeIncident);
 router.route("/reopenIncident/:id").post(verifyJWT,authorizeRoles("admin"),reopenIncident);
 
 router.route("/getAllIncidents").get(verifyJWT,authorizeRoles("admin","team_lead"),getAllIncidents);
+router.route("/getMyCreatedIncidents").get(verifyJWT,getMyCreatedIncidents);
 router.route("/getIncidentHistory/:id").get(verifyJWT,authorizeRoles("admin","team_lead"),getIncidentHistory);
 export default router

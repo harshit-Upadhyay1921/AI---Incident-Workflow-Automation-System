@@ -22,6 +22,7 @@ const TeamLeadCreateInc = () => {
     category: "",
     priority: "",
     status: "",
+    // createdBy: "",
     assignedDept: currentUser?.department || "",
     assignedTo: "",
     dueAt: "",
@@ -47,7 +48,7 @@ const TeamLeadCreateInc = () => {
 
     try {
       // TODO: Uncomment when backend preview endpoint is ready
-      const res = await api.post("/v1/incidents/createIncident",{
+      const res = await api.post("/v1/incidents/autoClassifyIncident",{
         title: form.title,
         description: form.description,
       },
@@ -60,6 +61,7 @@ const TeamLeadCreateInc = () => {
         category: previewData.category,
         priority: previewData.priority,
         status: previewData.status || "open",
+        // createdBy: previewData.createdBy, // Not needed in UI
         assignedDept: previewData.assignedDept,
         assignedTo: previewData.assignedTo,
         dueAt: previewData.dueAt,
@@ -93,7 +95,14 @@ const TeamLeadCreateInc = () => {
     try {
       const res = await api.post("/v1/incidents/createIncident",{
         title: form.title,
-        description: form.description
+        description: form.description,
+        category: autoData.category,
+        priority: autoData.priority,
+        status: autoData.status,
+        assignedTo: autoData.assignedTo,
+        assignedDept: autoData.assignedDept,
+        dueAt: autoData.dueAt,
+        nextEscalationAt: autoData.nextEscalationAt,
       });
       const createdIncident = res.data.data;
       // Optional manual department override using changeAssignDeptManual controller.
