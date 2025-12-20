@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-// import axios from "axios";
+import api from "../../api/api.js";
 import {
   PieChart,
   Pie,
@@ -28,68 +28,29 @@ const TeamLeadDashboard = () => {
       setLoading(true);
       try {
         // TODO: Uncomment when connecting to backend
-        // const [overviewRes, priorityRes, avgTimeRes, activeClosedRes] = await Promise.all([
-        //   axios.get("http://localhost:8000/api/v1/users/getOverview", { withCredentials: true }),
-        //   axios.get("http://localhost:8000/api/v1/users/getCountByPriority", { withCredentials: true }),
-        //   axios.get("http://localhost:8000/api/v1/users/getAvgResolutionTime", { withCredentials: true }),
-        //   axios.get("http://localhost:8000/api/v1/users/getActiveCloseIncidents", { withCredentials: true }),
-        // ]);
-        //
-        // const overviewData = overviewRes.data.data;
-        // setOverview({
-        //   totalIncidents: overviewData.totalIncidents,
-        //   statusWiseCount: {
-        //     open: overviewData.byStatus.open,
-        //     "in-progress": overviewData.byStatus.inProgress,
-        //     resolved: overviewData.byStatus.resolved,
-        //     closed: overviewData.byStatus.closed,
-        //   },
-        //   categoryWiseCount: Object.entries(overviewData.byCategory).map(([name, value]) => ({ name, value })),
-        //   departmentWiseCount: Object.entries(overviewData.byDepartment).map(([name, value]) => ({ name, value })),
-        // });
-        // setPriorityCount(priorityRes.data.data);
-        // setAvgResolutionTime(avgTimeRes.data.data);
-        // setActiveClosed(activeClosedRes.data.data);
-
-        // ------------------ DUMMY DATA (matches backend schema) ------------------
-        const dummyOverview = {
-          totalIncidents: 40,
+        const [overviewRes, priorityRes, avgTimeRes, activeClosedRes] = await Promise.all([
+          api.get("/v1/users/getOverview", { withCredentials: true }),
+          api.get("/v1/users/getCountPriority", { withCredentials: true }),
+          api.get("/v1/users/getAvgResolutionTime", { withCredentials: true }),
+          api.get("/v1/users/getActiveCloseIncidents", { withCredentials: true }),
+        ]);
+        
+        const overviewData = overviewRes.data.data;
+        setOverview({
+          totalIncidents: overviewData.totalIncidents,
           statusWiseCount: {
-            open: 10,
-            "in-progress": 8,
-            resolved: 12,
-            closed: 10,
+            open: overviewData.byStatus.open,
+            "in-progress": overviewData.byStatus.inProgress,
+            resolved: overviewData.byStatus.resolved,
+            closed: overviewData.byStatus.closed,
           },
-          categoryWiseCount: [
-            { name: "software", value: 11 },
-            { name: "hardware", value: 13 },
-            { name: "network", value: 7 },
-            { name: "other", value: 9 },
-          ],
-          departmentWiseCount: [
-            { name: "IT", value: 22 },
-            { name: "HR", value: 8 },
-          ],
-        };
-
-        const dummyPriority = {
-          critical: 6,
-          high: 12,
-          medium: 15,
-          low: 7,
-        };
-
-        const dummyActiveClosed = {
-          active: 18,
-          closed: 22,
-        };
-
-        const dummyAvgResTime = 4.2;
-
-        setOverview(dummyOverview);
-        setPriorityCount(dummyPriority);
-        setActiveClosed(dummyActiveClosed);
-        setAvgResolutionTime(dummyAvgResTime);
+          categoryWiseCount: Object.entries(overviewData.byCategory).map(([name, value]) => ({ name, value })),
+          departmentWiseCount: Object.entries(overviewData.byDepartment).map(([name, value]) => ({ name, value })),
+        });
+        setPriorityCount(priorityRes.data.data);
+        setAvgResolutionTime(avgTimeRes.data.data);
+        setActiveClosed(activeClosedRes.data.data);
+        
       } catch (error) {
         console.error("Dashboard Error:", error);
         alert("Failed to load dashboard data!");
