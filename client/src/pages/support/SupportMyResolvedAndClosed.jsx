@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-// import axios from "axios";
+import api from "../../api/api.js";
 import { MdMoreVert } from "react-icons/md";
 import ActionsMenu from "../../components/ActionsMenu.jsx";
 import { useNavigate } from "react-router-dom";
@@ -16,39 +16,12 @@ const SupportMyResolvedAndClosed = () => {
     setLoading(true);
 
     try {
-      // const res = await axios.get(
-      //   "http://localhost:8000/api/v1/incidents/getMyResolvedOrClosedIncidents",
-      //   { withCredentials: true }
-      // );
-      // setIncidents(res.data.data);
+      const res = await api.get(
+        "/v1/users/getMyResolveCloseIncidents",
+        { withCredentials: true }
+      );
+      setIncidents(res.data.data);
 
-      // ------------------ DUMMY DATA (matches backend shape) ------------------
-      const dummy = [
-        {
-          _id: "501",
-          title: "Printer not responding",
-          category: "hardware",
-          priority: "medium",
-          status: "resolved",
-          createdBy: { name: "Harshit", email: "harshit@example.com" },
-          assignedDept: "IT",
-          createdAt: "2025-01-10T09:00:00Z",
-          updatedAt: "2025-01-12T10:15:00Z",
-        },
-        {
-          _id: "502",
-          title: "Payroll login failure",
-          category: "software",
-          priority: "high",
-          status: "closed",
-          createdBy: { name: "Aman", email: "aman@example.com" },
-          assignedDept: "HR",
-          createdAt: "2025-01-11T12:00:00Z",
-          updatedAt: "2025-01-13T14:20:00Z",
-        },
-      ];
-
-      setIncidents(dummy);
     } catch (error) {
       console.error("Resolved/Closed Fetch Error:", error);
       alert("Failed to load resolved/closed incidents!");

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-// import axios from "axios";
+import api from "../../api/api.js";
 import {
   PieChart,
   Pie,
@@ -30,50 +30,17 @@ const SupportDashboard = () => {
       setLoading(true);
       try {
         // TODO: Uncomment when connecting to backend
-        // const res = await axios.get(
-        //   "http://localhost:8000/api/v1/users/getSupportDashboard",
-        //   { withCredentials: true }
-        // );
-        // const data = res.data.data;
-        //
-        // setKpis(data.kpis);
-        // setPriorityData(data.byPriority);      // [{ name, value }]
-        // setCategoryData(data.byCategory);      // [{ name, value }]
-        // setTrendData(data.resolvedTrend);      // [{ week, count }]
+        const res = await api.get(
+          "/v1/users/getSupportDashboard",
+          { withCredentials: true }
+        );
+        const data = res.data.data;
+        
+        setKpis(data.kpis);
+        setPriorityData(data.byPriority);      // [{ name, value }]
+        setCategoryData(data.byCategory);      // [{ name, value }]
+        setTrendData(data.resolvedTrend);      // [{ week, count }]
 
-        // ------------------ DUMMY DATA (matches backend shape) ------------------
-        const dummyKpis = {
-          assignedToMe: 12,
-          inProgress: 4,
-          resolved: 3,
-          slaBreached: 1,
-        };
-
-        const dummyPriority = [
-          { name: "Critical", value: 2 },
-          { name: "High", value: 4 },
-          { name: "Medium", value: 5 },
-          { name: "Low", value: 1 },
-        ];
-
-        const dummyCategory = [
-          { name: "Software", value: 5 },
-          { name: "Hardware", value: 3 },
-          { name: "Network", value: 2 },
-          { name: "Other", value: 2 },
-        ];
-
-        const dummyTrend = [
-          { week: "2025-W01", count: 1 },
-          { week: "2025-W02", count: 2 },
-          { week: "2025-W03", count: 0 },
-          { week: "2025-W04", count: 3 },
-        ];
-
-        setKpis(dummyKpis);
-        setPriorityData(dummyPriority);
-        setCategoryData(dummyCategory);
-        setTrendData(dummyTrend);
       } catch (error) {
         console.error("Support Dashboard Error:", error);
         alert("Failed to load support dashboard data!");

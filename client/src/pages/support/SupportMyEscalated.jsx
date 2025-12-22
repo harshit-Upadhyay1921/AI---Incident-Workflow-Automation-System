@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-// import axios from "axios";
+import api from "../../api/api.js";
 import { MdMoreVert, MdFilterList } from "react-icons/md";
 import ActionsMenu from "../../components/ActionsMenu.jsx";
 import { useNavigate } from "react-router-dom";
@@ -16,41 +16,12 @@ const SupportMyEscalated = () => {
         setLoading(true);
 
         try {
-            // const res = await axios.get(
-            //   "http://localhost:8000/api/v1/incidents/getMyEscalatedOrSlaBreached",
-            //   { withCredentials: true }
-            // );
-            // setIncidents(res.data.data);
-
-            // ------------------ DUMMY (Matches backend schema) ------------------
-            const dummy = [
-                {
-                    _id: "201",
-                    title: "Server CPU usage 95%",
-                    category: "software",
-                    priority: "critical",
-                    status: "in-progress",
-                    createdBy: { name: "Harshit", email: "harshit@example.com" },
-                    assignedDept: "IT",
-                    createdAt: "2025-01-25T09:20:00Z",
-                    escalationLevel: 2,
-                    dueAt: "2025-01-27T10:00:00Z",
-                },
-                {
-                    _id: "202",
-                    title: "Payroll system freeze",
-                    category: "hardware",
-                    priority: "high",
-                    status: "open",
-                    createdBy: { name: "Aman", email: "aman@example.com" },
-                    assignedDept: "HR",
-                    createdAt: "2025-01-24T11:10:00Z",
-                    escalationLevel: 1,
-                    dueAt: "2025-01-26T08:00:00Z",
-                },
-            ];
-
-            setIncidents(dummy);
+            const res = await api.get(
+              "/v1/users/getMyEscalatedOrSlaBreached",
+              { withCredentials: true }
+            );
+            setIncidents(res.data.data);
+            
         } catch (error) {
             console.error("My Escalated Fetch Error:", error);
             alert("Failed to load escalated incidents!");

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-// import axios from "axios";
+import api from "../../api/api.js"
 import { MdMoreVert, MdFilterList } from "react-icons/md";
 import ActionsMenu from "../../components/ActionsMenu";
 import { useNavigate } from "react-router-dom";
@@ -20,42 +20,12 @@ const SupportMyAssigned = () => {
   const fetchAssigned = async () => {
     setLoading(true);
     try {
-      // TODO: Uncomment this when backend is ready
-      // const res = await axios.get(
-      //   "http://localhost:8000/api/v1/incidents/my-assigned",
-      //   { params: filters, withCredentials: true }
-      // );
-      // setIncidents(res.data.data);
-
-      // ---------- DUMMY DATA (Matches backend shape) ----------
-      const dummy = [
-        {
-          _id: "201",
-          title: "Email not syncing",
-          category: "software",
-          priority: "high",
-          status: "open",
-          createdBy: { name: "Harshit", email: "harshit@example.com" },
-          assignedTo: { name: "Support Agent 1" },
-          assignedDept: "IT",
-          createdAt: "2025-01-20T10:00",
-          updatedAt: "2025-01-20T12:00",
-        },
-        {
-          _id: "202",
-          title: "Network cable damaged",
-          category: "hardware",
-          priority: "critical",
-          status: "in-progress",
-          createdBy: { name: "Aman", email: "aman@example.com" },
-          assignedTo: { name: "You" },
-          assignedDept: "IT",
-          createdAt: "2025-01-22T09:00",
-          updatedAt: "2025-01-22T11:30",
-        },
-      ];
-
-      setIncidents(dummy);
+      const res = await api.get(
+        "/v1/users/getMyAssignIncidents",
+        { params: filters, withCredentials: true }
+      );
+      setIncidents(res.data.data);
+      
     } catch (err) {
       console.error("Assigned Fetch Error:", err);
       alert("Failed to fetch assigned incidents!");
