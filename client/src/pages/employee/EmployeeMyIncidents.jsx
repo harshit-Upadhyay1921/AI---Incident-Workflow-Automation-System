@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-// import axios from "axios";
+import api from "../../api/api.js";
 import { MdFilterList } from "react-icons/md";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
@@ -31,59 +31,28 @@ const EmployeeMyIncidents = () => {
 
     setLoading(true);
     try {
-      // NOTE:
-      // Backend controller `getAllIncidents` currently authorizes only "admin" and "team_lead".
-      // To let employees also hit this endpoint, update the authorizeRoles in backend OR
-      // create a dedicated "getMyCreatedIncidents" controller.
-      //
-      // When backend is ready, uncomment this:
-      //
-      // const res = await axios.get(
-      //   "http://localhost:8000/api/v1/incidents/getAllIncidents",
-      //   {
-      //     params: {
-      //       ...filters,
-      //       createdBy: currentUser._id, // ensure we only get incidents created by this user
-      //     },
-      //     withCredentials: true,
-      //   }
-      // );
-      //
-      // const data = res.data.data;
-      // setIncidents(data.incidents);
-      // setTotalPages(data.totalPages);
+      const res = await api.get(
+        "/v1/incidents/getMyCreatedIncidents",
+        {
+          params: {
+            status: filters.status,
+            priority: filters.priority,
+            category: filters.category,
+            assignedTo: filters.assignedTo,
+            assignedDept: filters.assignedDept,
+            sortBy: filters.sortBy,
+            order: filters.order,
+            page: filters.page || 1,
+            limit: filters.limit
+          }
+        },
+        { withCredentials: true }
+      );
 
-      // ----------------- DUMMY DATA (shape matches backend) -------------------
-      const dummy = {
-        incidents: [
-          {
-            _id: "201",
-            title: "Laptop not booting",
-            category: "hardware",
-            priority: "high",
-            status: "open",
-            assignedTo: { name: "Support Agent 1", email: "support1@example.com" },
-            assignedDept: "IT",
-            createdAt: "2025-02-01T09:00:00Z",
-            updatedAt: "2025-02-01T09:15:00Z",
-          },
-          {
-            _id: "202",
-            title: "VPN disconnects frequently",
-            category: "network",
-            priority: "medium",
-            status: "in-progress",
-            assignedTo: { name: "Support Agent 2", email: "support2@example.com" },
-            assignedDept: "IT",
-            createdAt: "2025-02-02T11:30:00Z",
-            updatedAt: "2025-02-02T12:10:00Z",
-          },
-        ],
-        totalPages: 1,
-      };
+      const data = res.data.data;
+      setIncidents(data.myIncidents);
+      setTotalPages(data.totalPages);
 
-      setIncidents(dummy.incidents);
-      setTotalPages(dummy.totalPages);
     } catch (error) {
       console.error("My Incidents Fetch Error:", error);
       alert(error.response?.data?.message || "Failed to load incidents!");
@@ -423,11 +392,10 @@ const Pagination = ({ totalPages, page, onPage }) => (
         <button
           key={pageNum}
           onClick={() => onPage(pageNum)}
-          className={`px-4 py-2 rounded-lg border transition ${
-            page === pageNum
+          className={`px-4 py-2 rounded-lg border transition ${page === pageNum
               ? "bg-primary text-white border-primary"
               : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-          }`}
+            }`}
         >
           {pageNum}
         </button>

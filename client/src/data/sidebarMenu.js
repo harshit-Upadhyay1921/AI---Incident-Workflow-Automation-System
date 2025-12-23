@@ -36,11 +36,8 @@ export const sidebarMenu = {
 
   // ---------------- EMPLOYEE ----------------
   employee: [
-    // Uses createIncident controller (same UI as team lead create)
     { label: "Create Incident", path: "/employee/create-incident", icon: "MdAddCircle" },
-    // Uses getAllIncidents (filtered by createdBy) or a dedicated getMyCreatedIncidents
     { label: "My Incidents", path: "/employee/my-incidents", icon: "MdReport" },
-
     { label: "Profile", path: "/employee/profile", icon: "MdPerson" },
   ],
 };

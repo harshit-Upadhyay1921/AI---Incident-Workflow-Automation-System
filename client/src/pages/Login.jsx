@@ -30,6 +30,9 @@ const Login = () => {
       if(user.role === "senior_support"){ 
         navigate("/support/dashboard");
       }
+      else if(user.role === "employee"){
+        navigate("/employee/create-incident");
+      }
       else navigate(`/${user.role}/dashboard`);
     }
     catch (error) {

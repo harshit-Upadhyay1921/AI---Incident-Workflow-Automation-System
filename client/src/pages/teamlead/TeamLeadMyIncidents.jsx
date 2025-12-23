@@ -31,13 +31,7 @@ const TeamLeadMyIncidents = () => {
 
     setLoading(true);
     try {
-      // NOTE:
-      // Backend controller `getAllIncidents` currently authorizes only "admin" and "team_lead".
-      // To let employees also hit this endpoint, update the authorizeRoles in backend OR
-      // create a dedicated "getMyCreatedIncidents" controller.
-      //
-      // When backend is ready, uncomment this:
-      //
+      
       const res = await api.get("/v1/incidents/getMyCreatedIncidents", {
         params: {
           status: filters.status,

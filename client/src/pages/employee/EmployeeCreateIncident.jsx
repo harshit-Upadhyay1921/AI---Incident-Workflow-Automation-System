@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-// import axios from "axios";
+import api from "../../api/api.js";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 
@@ -47,34 +47,24 @@ const EmployeeCreateIncident = () => {
 
     try {
       // TODO: Uncomment when backend preview endpoint is ready
-      // const res = await axios.post(
-      //   "http://localhost:8000/api/v1/incidents/classify-preview",
-      //   { title: form.title, description: form.description },
-      //   { withCredentials: true }
-      // );
-      // const previewData = res.data.data;
-      // setAutoData({
-      //   category: previewData.category,
-      //   priority: previewData.priority,
-      //   status: previewData.status || "open",
-      //   assignedDept: previewData.assignedDept || currentUser?.department,
-      //   assignedTo: previewData.assignedTo,
-      //   dueAt: previewData.dueAt,
-      //   nextEscalationAt: previewData.nextEscalationAt,
-      // });
-
-      // ------------------ DUMMY AUTOMATION DATA (for testing) ------------------
-      const dummyAutomation = {
-        category: "software",
-        priority: "high",
-        status: "open",
-        assignedDept: currentUser?.department || "IT",
-        assignedTo: "support-user-1",
-        dueAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        nextEscalationAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-      };
-
-      setAutoData(dummyAutomation);
+      const res = await api.post("/v1/incidents/autoClassifyIncident",{
+        title: form.title,
+        description: form.description,
+      },
+      {
+        withCredentials: true,
+      }
+    )
+      const previewData = res.data.data;
+      setAutoData({
+        category: previewData.category,
+        priority: previewData.priority,
+        status: previewData.status || "open",
+        assignedDept: previewData.assignedDept || currentUser?.department,
+        assignedTo: previewData.assignedTo,
+        dueAt: previewData.dueAt,
+        nextEscalationAt: previewData.nextEscalationAt,
+      });
 
     } catch (err) {
       console.error("Auto Classify Error:", err);
@@ -102,33 +92,33 @@ const EmployeeCreateIncident = () => {
 
     try {
       // TODO: Uncomment when connecting to backend
-      // const res = await axios.post(
-      //   "http://localhost:8000/api/v1/incidents/createIncident",
-      //   {
-      //     title: form.title,
-      //     description: form.description,
-      //   },
-      //   { withCredentials: true }
-      // );
-      //
-      // const createdIncident = res.data.data;
-      //
+      const res = await api.post("/v1/incidents/createIncident",{
+        title: form.title,
+        description: form.description,
+        category: autoData.category,
+        priority: autoData.priority,
+        status: autoData.status,
+        assignedTo: autoData.assignedTo,
+        assignedDept: autoData.assignedDept,
+        dueAt: autoData.dueAt,
+        nextEscalationAt: autoData.nextEscalationAt,
+      });
+      const createdIncident = res.data.data;
+
       // // Optional manual department override using changeAssignDeptManual controller.
       // // Backend will also recalculate assignedTo for the new department.
-      // if (manualDept && manualDept !== createdIncident.assignedDept) {
-      //   await axios.post(
-      //     `http://localhost:8000/api/v1/incidents/changeAssignDeptManual/${createdIncident._id}`,
-      //     { newDept: manualDept },
-      //     { withCredentials: true }
-      //   );
-      // }
-      //
-      // alert("Incident created successfully!");
-      // navigate("../incidents");
-
-      // Dummy success for now
-      alert("Incident Created Successfully! (dummy)");
-      navigate("../incidents");
+      if (manualDept && manualDept !== createdIncident.assignedDept) {
+        await api.post(`/v1/incidents/changeAssignDeptManual/${createdIncident._id}`, {
+          newDept: manualDept
+        },
+        {
+          withCredentials: true
+        }
+      )
+      }
+      
+      alert("Incident created successfully!");
+      navigate("/employee/my-incidents");
 
     } catch (err) {
       console.error("Create Incident Error:", err);
