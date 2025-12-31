@@ -4,6 +4,7 @@ import api from "../../api/api.js";
 import { MdFilterList } from "react-icons/md";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
+import IncidentHistory from "../IncidentHistory.jsx";
 
 const EmployeeMyIncidents = () => {
   const { currentUser } = useAuth();
@@ -24,6 +25,9 @@ const EmployeeMyIncidents = () => {
     page: 1,
     limit: 10,
   });
+
+  const [showHistory, setShowHistory] = useState(false);
+  const [selectedIncidentId, setSelectedIncidentId] = useState(null);
 
   // ----------------- FETCH MY INCIDENTS -------------------
   const fetchIncidents = async () => {
@@ -290,9 +294,11 @@ const EmployeeMyIncidents = () => {
                       <td className="px-6 py-4 text-center">
                         <div className="inline-flex items-center gap-2">
                           <button
-                            type="button"
-                            onClick={() => navigate(`/incidents/${inc._id}/history`)}
-                            className="px-3 py-1.5 text-xs border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+                            className="px-3 py-1 border rounded-lg text-sm hover:bg-gray-100"
+                            onClick={() => {
+                              setSelectedIncidentId(inc._id);
+                              setShowHistory(true);
+                            }}
                           >
                             View History
                           </button>
@@ -339,6 +345,13 @@ const EmployeeMyIncidents = () => {
           <div className="p-6 border-t border-gray-200">
             <Pagination totalPages={totalPages} page={filters.page} onPage={handlePage} />
           </div>
+        )}
+
+        {showHistory && (
+          <IncidentHistory
+            incidentId={selectedIncidentId}
+            onClose={() => setShowHistory(false)}
+          />
         )}
       </motion.div>
     </div>
@@ -393,8 +406,8 @@ const Pagination = ({ totalPages, page, onPage }) => (
           key={pageNum}
           onClick={() => onPage(pageNum)}
           className={`px-4 py-2 rounded-lg border transition ${page === pageNum
-              ? "bg-primary text-white border-primary"
-              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+            ? "bg-primary text-white border-primary"
+            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
             }`}
         >
           {pageNum}

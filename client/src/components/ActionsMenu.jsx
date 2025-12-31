@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import IncidentHistory from "../pages/IncidentHistory.jsx";
 
 const ActionsMenu = ({ incident, onClose }) => {
   const { currentUser } = useAuth();
@@ -9,6 +11,9 @@ const ActionsMenu = ({ incident, onClose }) => {
   const menuRef = useRef(null);
 
   const role = currentUser?.role;
+
+  const [showHistory, setShowHistory] = useState(false);
+  const [selectedIncidentId, setSelectedIncidentId] = useState(null);
 
   // Close when clicking outside
   useEffect(() => {
@@ -30,14 +35,14 @@ const ActionsMenu = ({ incident, onClose }) => {
 
   const canClose =
     role === "admin" || currentUser?._id === incident.createdBy;
-    
+
   const canReopen = role === "admin";
 
   // -------- ACTION HANDLERS --------
-  const viewHistory = () => {
-    navigate(`/incidents/${incident._id}/history`);
-    onClose();
-  };
+  // const viewHistory = () => {                        //no need to navigate
+  //   navigate(`/incident/${incident._id}/history`);
+  //   onClose();
+  // };
 
   const closeIncident = async () => {
     // await axios.patch(`/api/incidents/${incident._id}/close`);
@@ -63,7 +68,10 @@ const ActionsMenu = ({ incident, onClose }) => {
 
         {canViewHistory && (
           <li
-            onClick={viewHistory}
+            onClick={() => {
+              setShowHistory(true);
+              setSelectedIncidentId(incident._id);
+            }}
             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
           >
             View History
@@ -88,6 +96,12 @@ const ActionsMenu = ({ incident, onClose }) => {
           </li>
         )}
       </ul>
+      {showHistory && (
+        <IncidentHistory
+          incidentId={selectedIncidentId}
+          onClose={() => setShowHistory(false)}
+        />
+      )}
     </motion.div>
   );
 };

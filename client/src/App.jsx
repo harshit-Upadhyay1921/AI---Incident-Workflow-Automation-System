@@ -20,6 +20,7 @@ import SupportMyEscalated from "./pages/support/SupportMyEscalated.jsx";
 import SupportMyResolvedAndClosed from "./pages/support/SupportMyResolvedAndClosed.jsx";
 import EmployeeMyIncidents from "./pages/employee/EmployeeMyIncidents.jsx"; 
 import EmployeeCreateIncident from "./pages/employee/EmployeeCreateIncident.jsx";
+// import IncidentHistory from "./pages/IncidentHistory.jsx";
 
 function App() {
 
@@ -52,7 +53,9 @@ function App() {
           <Route path="/employee/my-incidents" element={<EmployeeMyIncidents/>}/>
           <Route path="/employee/create-incident" element={<EmployeeCreateIncident/>}/>
         </Route>
+
         <Route path="/incident/:id" element={<IncidentDetails/>}/>
+        {/* <Route path="/incident/:id/history" element={<IncidentHistory/>}/> */}
       </Routes>
 
     </div>

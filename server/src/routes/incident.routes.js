@@ -9,7 +9,8 @@ import {
     reopenIncident, 
     getAllIncidents, 
     getMyCreatedIncidents,
-    getIncidentHistory
+    getIncidentHistory,
+    getIncidentDetails
 } from "../controllers/incident.controllers.js";
 
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
@@ -28,4 +29,6 @@ router.route("/reopenIncident/:id").post(verifyJWT,authorizeRoles("admin"),reope
 router.route("/getAllIncidents").get(verifyJWT,authorizeRoles("admin","team_lead"),getAllIncidents);
 router.route("/getMyCreatedIncidents").get(verifyJWT,getMyCreatedIncidents);
 router.route("/getIncidentHistory/:id").get(verifyJWT,authorizeRoles("admin","team_lead"),getIncidentHistory);
+router.route("/getIncidentDetails/:id").get(verifyJWT,getIncidentDetails);
+
 export default router

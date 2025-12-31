@@ -4,6 +4,7 @@ import api from "../../api/api.js";
 import { MdFilterList } from "react-icons/md";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
+import IncidentHistory from "../IncidentHistory.jsx";
 
 const TeamLeadMyIncidents = () => {
   const { currentUser } = useAuth();
@@ -12,6 +13,10 @@ const TeamLeadMyIncidents = () => {
   const [incidents, setIncidents] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+
+  // for viewing history modal
+  const [showHistory, setShowHistory] = useState(false);
+  const [selectedIncidentId, setSelectedIncidentId] = useState(null);
 
   const [filters, setFilters] = useState({
     status: "",
@@ -289,7 +294,10 @@ const TeamLeadMyIncidents = () => {
                         <div className="inline-flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => navigate(`/incidents/${inc._id}/history`)}
+                            onClick={() => {
+                              setShowHistory(true);
+                              setSelectedIncidentId(inc._id);
+                            }}
                             className="px-3 py-1.5 text-xs border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
                           >
                             View History
@@ -337,6 +345,13 @@ const TeamLeadMyIncidents = () => {
           <div className="p-6 border-t border-gray-200">
             <Pagination totalPages={totalPages} page={filters.page} onPage={handlePage} />
           </div>
+        )}
+
+        {showHistory && (
+          <IncidentHistory
+            incidentId={selectedIncidentId}
+            onClose={() => setShowHistory(false)}
+          />
         )}
       </motion.div>
     </div>

@@ -354,15 +354,15 @@ const getIncidentHistory = asyncHandler(async (req, res) => {
     const incidentId = req.params.id;
     if (!incidentId) throw new ApiError(400, "Incident id is required!");
 
-    const incident = await Incident.findById(incidentId);
-    if (!incident) throw new ApiError(404, "Incident not found!");
-
     const isAdminOrTeamlead = ["admin", "team_lead"].includes(req.user.role);
     const isCreatorOrAssignee = req.user._id.toString() === incident.createdBy.toString() || req.user._id.toString() === incident.assignedTo.toString();
 
     if (!isAdminOrTeamlead && !isCreatorOrAssignee) {
         throw new ApiError(400, "You are not authorized to view the history")
     };
+
+    const incident = await Incident.findById(incidentId);
+    if (!incident) throw new ApiError(404, "Incident not found!");
 
     const incidentHistory = await AuditLog.find({ incidentId })
         .populate("changedBy", "name role")
@@ -373,7 +373,22 @@ const getIncidentHistory = asyncHandler(async (req, res) => {
     );
 })
 
-export { autoClassifyIncident, createIncident, changeAssignDeptManual, updateIncidentStatus, markResolved, closeIncident, reopenIncident, getAllIncidents, getMyCreatedIncidents, getIncidentHistory }
+const getIncidentDetails = asyncHandler(async (req,res) => {
+    const incidentId = req.params.id;
+    if(!incidentId) throw new ApiError(400,"Incident Id is required!");
+
+    const incident = await Incident.findById(incidentId)
+                                .populate("createdBy","name email role")
+                                .populate("assignedTo","name email role");
+    if(!incident) throw new ApiError(400,"Incident not found!!");
+
+    return res.status(200).json(
+        new ApiResponse(200,incident,"incident details fetched successfully!")
+    )
+
+})
+
+export { autoClassifyIncident, createIncident, changeAssignDeptManual, updateIncidentStatus, markResolved, closeIncident, reopenIncident, getAllIncidents, getMyCreatedIncidents, getIncidentHistory, getIncidentDetails }
 //we have to build this controller also in this for admins to manually change priority, descp, etc in case of if SLA recalculation needed.
 
 // 1️⃣ Do we need an “Update Incident” controller?

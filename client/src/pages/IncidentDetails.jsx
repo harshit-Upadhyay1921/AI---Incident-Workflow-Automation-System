@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-// import axios from "axios"; // Uncomment when ready
+import api from "../api/api.js"
 
 // --- UTILITY ICONS (Inline to avoid external deps) ---
 const Icons = {
@@ -39,23 +39,9 @@ const IncidentDetails = () => {
         await new Promise((r) => setTimeout(r, 600));
 
         // DUMMY INCIDENT
-        const dummyIncident = {
-          _id: incidentId,
-          title: "System Freeze on Login",
-          description: "The system becomes unresponsive immediately after the user enters credentials on the main portal. This affects approximately 20% of users in the Marketing department.",
-          category: "Software",
-          priority: "critical", // critical, high, medium, low
-          status: "in-progress", // Try changing this to test stepper
-          createdBy: { name: "Harshit", email: "harshit@example.com", _id: "u101", role: "Employee" },
-          assignedTo: { name: "Support Agent", email: "agent@support.com", _id: "u202" },
-          assignedDept: "IT Operations",
-          escalationLevel: 2,
-          nextEscalationAt: "2025-01-28T10:00:00",
-          dueAt: "2025-01-30T18:00:00",
-          resolvedAt: null,
-          createdAt: "2025-01-20T10:00:00",
-          updatedAt: "2025-01-21T11:30:00",
-        };
+        const res = await api.get(`/v1/incidents/getIncidentDetails/${incidentId}`);
+        const data = res.data.data;
+
 
         // DUMMY HISTORY
         const dummyHistory = [
@@ -64,7 +50,7 @@ const IncidentDetails = () => {
           { _id: "h3", action: "status_change", changedBy: { name: "Support Agent", role: "support" }, createdAt: "2025-01-21T09:00:00", note: "Changed status to In-Progress." },
         ];
 
-        setIncident(dummyIncident);
+        setIncident(data);
         setHistory(dummyHistory);
       } catch (err) {
         console.error(err);
@@ -78,10 +64,10 @@ const IncidentDetails = () => {
   // -------- PERMISSIONS --------
   const canMarkInProgress = ["support", "senior_support"].includes(role);
   const canMarkResolved = ["support", "senior_support"].includes(role);
-  const canClose = role === "admin" || currentUser?._id === incident?.createdBy?._id;
+  const canClose = role === "admin" || currentUser?._id?.toString() === incident?.createdBy?._id?.toString();
   const canReopen = role === "admin";
 
-  if (loading) return null; // Or a spinner overlay
+  if (loading) return null; 
 
   return (
     <AnimatePresence>
@@ -102,7 +88,7 @@ const IncidentDetails = () => {
           className="bg-gray-50 w-full max-w-6xl h-[90vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col relative"
           onClick={(e) => e.stopPropagation()} // Prevent close on modal click
         >
-          
+
           {/* --- HEADER --- */}
           <div className="flex items-center justify-between px-8 py-5 bg-white border-b border-gray-200">
             <div>
@@ -120,19 +106,54 @@ const IncidentDetails = () => {
             {/* HEADER ACTIONS (Professional Placement) */}
             <div className="flex items-center gap-3">
               {incident.status === "open" && canMarkInProgress && (
-                <HeaderBtn label="Start Investigation" color="blue" onClick={() => console.log("Mark In Progress")} />
+                <HeaderBtn label="Mark In-Progress" color="blue" onClick={async () => {
+                  try {
+                    const res = await api.post(`/v1/incidents/updateIncStatus/${incidentId}`);
+                    setIncident(res.data.data);
+                    // alert("Incident marked in progress!");
+
+                  } catch (error) {
+                    console.error(`error in marking in progress,${error}`);
+                    alert(error.response?.data?.message || "Failed to mark incident in progress.");
+                  }
+                }} />
               )}
               {incident.status !== "resolved" && incident.status !== "closed" && canMarkResolved && (
-                <HeaderBtn label="Resolve Incident" color="green" onClick={() => console.log("Mark Resolved")} />
+                <HeaderBtn label="Resolve Incident" color="green" onClick={async () => {
+                  try {
+                    const res = await api.post(`/v1/incidents/markResolve/${incidentId}`);
+                    setIncident(res.data.data);
+                    // alert("Incident marked resolved!");
+                  } catch (error) {
+                    console.error(`error in marking resolve,${error}`);
+                    alert(error.response?.data?.message || "Failed to mark incident resolved.");
+                  }
+                } } />
               )}
               {incident.status === "resolved" && canClose && (
-                <HeaderBtn label="Close Ticket" color="gray" onClick={() => console.log("Close")} />
+                <HeaderBtn label="Close Ticket" color="gray" onClick={async () => {
+                  try {
+                    const res = await api.post(`/v1/incidents/closeIncident/${incidentId}`);
+                    setIncident(res.data.data);
+                  } catch (error) {
+                    console.error(`error in closing incident,${error}`);
+                    alert(error.response?.data?.message || "Failed to close incident.");
+                  }
+                }} />
               )}
               {incident.status === "closed" && canReopen && (
-                <HeaderBtn label="Reopen" color="red" onClick={() => console.log("Reopen")} />
+                <HeaderBtn label="Reopen" color="red" onClick={async () => {
+                  try {
+                    const res = await api.post(`/v1/incidents/reopenIncident/${incidentId}`);
+                    setIncident(res.data.data);
+                  } catch (error) {
+                    console.error(`error in reopening incident,${error}`);
+                    alert(error.response?.data?.message || "Failed to reopen incident."); 
+                  }
+                }} />
               )}
-              
-              <button 
+
+              <button
                 onClick={handleClose}
                 className="ml-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition"
               >
@@ -143,7 +164,7 @@ const IncidentDetails = () => {
 
           {/* --- SCROLLABLE BODY --- */}
           <div className="flex-1 overflow-y-auto p-8">
-            
+
             {/* 1. PROFESSIONAL STATUS STEPPER */}
             <div className="mb-10">
               <StatusStepper currentStatus={incident.status} />
@@ -151,14 +172,14 @@ const IncidentDetails = () => {
 
             {/* 2. GRID LAYOUT */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              
+
               {/* LEFT COL (Main Info) */}
               <div className="lg:col-span-2 space-y-6">
-                
+
                 {/* Description Card */}
                 <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <span className="w-1 h-6 bg-emerald-800 rounded-full"></span>      
+                    <span className="w-1 h-6 bg-emerald-800 rounded-full"></span>
                     Description
                   </h3>
                   <p className="text-gray-600 leading-relaxed whitespace-pre-line">
@@ -177,18 +198,18 @@ const IncidentDetails = () => {
                       <div key={h._id} className="relative">
                         {/* Timeline Dot */}
                         <span className="absolute -left-[21px] top-1 w-3 h-3 bg-gray-300 rounded-full border-2 border-white ring-1 ring-gray-100"></span>
-                        
+
                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1">
-                           <div>
-                              <p className="text-sm font-semibold text-gray-800 capitalize">
-                                {h.action.replace("_", " ")}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                by <span className="font-medium text-gray-700">{h.changedBy.name}</span> ({h.changedBy.role})
-                              </p>
-                              {h.note && <p className="text-sm text-gray-600 mt-1 bg-gray-50 p-2 rounded">{h.note}</p>}
-                           </div>
-                           <span className="text-xs text-gray-400 whitespace-nowrap">{new Date(h.createdAt).toLocaleString()}</span>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-800 capitalize">
+                              {h.action.replace("_", " ")}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              by <span className="font-medium text-gray-700">{h.changedBy.name}</span> ({h.changedBy.role})
+                            </p>
+                            {h.note && <p className="text-sm text-gray-600 mt-1 bg-gray-50 p-2 rounded">{h.note}</p>}
+                          </div>
+                          <span className="text-xs text-gray-400 whitespace-nowrap">{new Date(h.createdAt).toLocaleString()}</span>
                         </div>
                       </div>
                     ))}
@@ -199,13 +220,13 @@ const IncidentDetails = () => {
 
               {/* RIGHT COL (Sidebar Details) */}
               <div className="space-y-6">
-                
+
                 {/* People Card */}
                 <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                   <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">People involved</h4>
-                  
+
                   <div className="space-y-4">
-                    <UserRow label="Reported By" user={incident.createdBy} />
+                    <UserRow label="Created By" user={incident.createdBy} />
                     <div className="h-px bg-gray-100"></div>
                     <UserRow label="Assigned To" user={incident.assignedTo} sub={incident.assignedDept} />
                   </div>
@@ -214,26 +235,26 @@ const IncidentDetails = () => {
                 {/* SLA & Dates Card */}
                 <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                   <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">SLA & Timing</h4>
-                  
+
                   <div className="space-y-3">
                     <DateRow label="Created" date={incident.createdAt} />
                     <DateRow label="Last Updated" date={incident.updatedAt} />
                     <div className="h-px bg-gray-100 my-2"></div>
                     <DateRow label="Due Date" date={incident.dueAt} isRed={true} />
                     <div className="flex justify-between items-center text-sm mt-3">
-                       <span className="text-gray-500">Escalation Lvl</span>
-                       <span className="font-mono font-bold bg-orange-100 text-orange-700 px-2 py-0.5 rounded">L{incident.escalationLevel}</span>
+                      <span className="text-gray-500">Escalation Lvl</span>
+                      <span className="font-mono font-bold bg-orange-100 text-orange-700 px-2 py-0.5 rounded">L{incident.escalationLevel}</span>
                     </div>
                   </div>
                 </div>
 
-                 {/* Category Card */}
-                 <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
-                    <span className="text-gray-500 text-sm font-medium">Category</span>
-                    <span className="px-3 py-1 bg-indigo-50 text-indigo-700 text-sm font-semibold rounded-lg">
-                      {incident.category}
-                    </span>
-                 </div>
+                {/* Category Card */}
+                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+                  <span className="text-gray-500 text-sm font-medium">Category</span>
+                  <span className="px-3 py-1 bg-indigo-50 text-indigo-700 text-sm font-semibold rounded-lg">
+                    {incident.category}
+                  </span>
+                </div>
 
               </div>
             </div>
@@ -256,12 +277,17 @@ const StatusStepper = ({ currentStatus }) => {
     <div className="w-full flex items-center justify-between relative px-4">
       {/* Background Line */}
       <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-0 translate-y-[-50%] rounded"></div>
-      
+
       {/* Active Progress Line */}
-      <div 
-        className="absolute top-1/2 left-0 h-1 bg-emerald-750 -z-0 translate-y-[-50%] transition-all duration-500 rounded"
-        style={{ width: `${(currentIndex / (STATUS_STEPS.length - 1)) * 100}%` }}
-      ></div>
+      <motion.div
+        initial={false}
+        animate={{
+          width: `${(currentIndex / (STATUS_STEPS.length - 1)) * 100}%`
+        }}
+        transition={{ duration: 0.5, ease: "easeInOut" }}
+        className="absolute top-1/2 left-0 h-1 bg-emerald-700 -z-0 -translate-y-1/2 rounded"
+      />
+
 
       {STATUS_STEPS.map((step, index) => {
         const isCompleted = index <= currentIndex;
@@ -283,7 +309,7 @@ const StatusStepper = ({ currentStatus }) => {
                 <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
               )}
             </motion.div>
-            
+
             <div className={`absolute top-10 text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${isCompleted ? 'text-emerald-800' : 'text-gray-400'}`}>
               {step.replace("-", " ")}
             </div>
@@ -334,7 +360,7 @@ const DateRow = ({ label, date, isRed }) => (
       <span className="opacity-70"><Icons.Calendar /></span> {label}
     </span>
     <span className={`font-medium ${isRed ? "text-red-600" : "text-gray-700"}`}>
-      {date ? new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' }) : "-"}
+      {date ? new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : "-"}
     </span>
   </div>
 );
