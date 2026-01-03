@@ -1,14 +1,17 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink,useNavigate } from "react-router-dom";
 import * as Icons from "react-icons/md";
 import { motion } from "framer-motion";
 import { sidebarMenu } from "../data/sidebarMenu";
-import { useAuth } from "../context/AuthContext.jsx"; // you will add this later
+import { useAuth } from "../context/AuthContext.jsx"; 
+import api from "../api/api.js"; 
 
 const Sidebar = () => {
-  const { role } = useAuth(); // 'admin' | 'support' | 'employee'
+  const { role,logout } = useAuth(); // 'admin' | 'support' | 'employee'
 //   const role = "admin"; // temporary hardcoded role for demonstration
   const [isOpen, setIsOpen] = useState(true);
+
+  const navigate = useNavigate();
 
   const menuItems = sidebarMenu[role] || [];
 
@@ -54,7 +57,18 @@ const Sidebar = () => {
       {/* BOTTOM ACTION: LOGOUT */}
       <div className="mt-auto px-4 pb-6">
         <button
-          onClick={() => {}}
+          onClick={async () => {
+            try {
+              const res = await api.post("/v1/auth/logout", {}, { withCredentials: true });
+              logout();
+              // window.location.href = "/login";  //this is kind of reloading the login page, not looking good
+              navigate("/login");
+
+            } catch (error) {
+              console.error("Logout failed:", error);
+              alert("Logout failed. Please try again.");
+            } 
+          }}
           className="flex items-center gap-3 px-4 py-3 rounded-lg w-full bg-white/10 hover:bg-white/20"
         >
           <Icons.MdLogout size={22} />

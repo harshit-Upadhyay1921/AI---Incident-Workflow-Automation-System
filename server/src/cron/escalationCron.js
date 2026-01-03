@@ -5,7 +5,7 @@ import {escalateIncident} from "../utils/escalateIncident.js";
 console.log("🔥 Escalation cron file loaded");
 // "*/15 * * * *"
 // "* * * * *"
-cron.schedule("* * * * *", async () => {                       
+cron.schedule("*/15 * * * *", async () => {                       
     console.log(`[CRON] Escalation check started at ${new Date().toISOString()}`);
     
     const now = new Date();
