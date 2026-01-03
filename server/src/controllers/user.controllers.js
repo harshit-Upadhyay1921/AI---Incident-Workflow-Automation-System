@@ -138,7 +138,15 @@ const getOverview = asyncHandler(async (req, res) => {
     if (!["admin", "team_lead"].includes(req.user.role)) throw new ApiError(400, "You are not authorized to get overview!");
 
     const totalIncidents = await Incident.countDocuments();
-    if (totalIncidents === 0) throw new ApiError(400, "No incident is found while counting!");
+    if (totalIncidents === 0) {
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                0,
+                "There are no incidents"
+            )
+        )
+    };
 
     const byStatus = {
         open: await Incident.countDocuments({ status: "open" }),
@@ -281,6 +289,7 @@ const getMyAssignedIncidents = asyncHandler(async (req, res) => {
 
     const incidents = await Incident.find(query)
         .populate("createdBy", "name email")
+        .populate("assignedTo", "name email")
         .lean();   //Use .lean() for better performance (since we’re only reading data).
 
     if (incidents.length === 0) {
@@ -313,7 +322,7 @@ const getMyEscalatedOrSlaBreached = asyncHandler(async (req, res) => {
             { escalationLevel: { $gt: currentSupportLevel } },
             { dueAt: { $lt: currentTime } }
         ]
-    }).populate("createdBy", "name email").lean();
+    }).populate("createdBy", "name email").populate("assignedTo", "name email").lean();
 
     if (incidents.length === 0) {
         return res.status(200).json(
@@ -338,6 +347,7 @@ const getMyResolvedOrClosedIncidents = asyncHandler(async (req, res) => {
         ]
     })
         .populate("createdBy", "name email")
+        .populate("assignedTo","name email")
         .lean();
 
     if (incidents.length === 0) {
