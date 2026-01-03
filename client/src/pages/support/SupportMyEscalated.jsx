@@ -157,7 +157,7 @@ const SupportMyEscalated = () => {
                                                 </span>
                                             </td>
 
-                                            <td className="px-6 py-4">{inc.createdBy.name}</td>
+                                            <td className="px-6 py-4">{inc.createdBy?.name || inc.createdBy || "—"} </td>
 
                                             <td className="px-6 py-4">
                                                 <span className="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">

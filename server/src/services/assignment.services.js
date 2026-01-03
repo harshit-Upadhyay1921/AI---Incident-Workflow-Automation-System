@@ -1,6 +1,5 @@
 import { User } from "../models/user.models.js";
 import { Incident } from "../models/incident.models.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 
 
@@ -8,13 +7,15 @@ export const getLeastLoadedSupportAgent = async (role,department) => {
     const supportEmployees = await User.find({
         role: role,
         department:department
-    }).select("_id");
+    });
 
     if(supportEmployees.length===0){
         throw new ApiError(400,"no support user exist for this department!");
     }
 
-    const loadMap = new Map();
+    let minUser = null;
+    let minCount = Infinity;
+
     for(const user of supportEmployees){
         const count = await Incident.countDocuments({
             assignedTo: user._id,
@@ -23,17 +24,10 @@ export const getLeastLoadedSupportAgent = async (role,department) => {
             }
         })
 
-        loadMap.set(user._id.toString(),count);
-    }
-
-    let minUser = null;
-    let minCount = Infinity;
-
-    for(const [userId,count] of loadMap.entries()){
-        if(count<minCount){
-            minCount=count;
-            minUser=userId;
+        if(count < minCount){
+            minCount = count;
+            minUser = user;  // store full user object
         }
     }
-    return minUser;
+    return minUser;  // return User document, not id
 }

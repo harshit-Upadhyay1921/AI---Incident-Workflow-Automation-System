@@ -5,6 +5,9 @@ dotenv.config({ path: "C:/Users/Lenovo/OneDrive/Desktop/AI-driven incident and w
 import {app} from './app.js';
 import connectionDB from './db/indexDB.js';
 import {configureCloudinary} from './utils/cloudinary.js';
+
+import "./cron/escalationCron.js";
+
 configureCloudinary();
 
 connectionDB()

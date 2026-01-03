@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.models.js";
 import { Incident } from "../models/incident.models.js";
-
+import { escalateIncident } from "../utils/escalateIncident.js";
 
 const updatePassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body
@@ -27,13 +27,13 @@ const changeRole = asyncHandler(async (req, res) => {   //by admin
     const { role } = req.body
     if (!role) throw new ApiError(400, "new role is required!")
 
-    const validRoles = ["employee","support","senior_support", "team_lead", "admin"]
+    const validRoles = ["employee", "support", "senior_support", "team_lead", "admin"]
     if (!validRoles.includes(role)) {
         throw new ApiError(402, "Invalid role!")
     }
 
-    if(req.user.role !== "admin"){
-        throw new ApiError(400,"Only admin can change role!")
+    if (req.user.role !== "admin") {
+        throw new ApiError(400, "Only admin can change role!")
     }
 
     const user = await User.findById(userId)
@@ -57,8 +57,8 @@ const assignDepartment = asyncHandler(async (req, res) => {  //by admin
     const userId = req.params.id
     const { department } = req.body
 
-    if(req.user.role !== "admin"){
-        throw new ApiError(400,"Only admin can assign department!")
+    if (req.user.role !== "admin") {
+        throw new ApiError(400, "Only admin can assign department!")
     }
 
     if (!department) throw new ApiError(400, "Department is required!")
@@ -141,11 +141,11 @@ const getOverview = asyncHandler(async (req, res) => {
     if (totalIncidents === 0) throw new ApiError(400, "No incident is found while counting!");
 
     const byStatus = {
-    open: await Incident.countDocuments({ status: "open" }),
-    inProgress: await Incident.countDocuments({ status: "in-progress" }),
-    resolved: await Incident.countDocuments({ status: "resolved" }),
-    closed: await Incident.countDocuments({ status: "closed" }),
-  };
+        open: await Incident.countDocuments({ status: "open" }),
+        inProgress: await Incident.countDocuments({ status: "in-progress" }),
+        resolved: await Incident.countDocuments({ status: "resolved" }),
+        closed: await Incident.countDocuments({ status: "closed" }),
+    };
 
     // const byCategory = {};
     // const software = await Incident.countDocuments({
@@ -268,35 +268,35 @@ const getActiveAndClosedIncidents = asyncHandler(async (req, res) => {
 })
 
 //support APIs
-const getMyAssignedIncidents = asyncHandler(async (req,res) => {
-    if(!["support","senior_support","team_lead"].includes(req.user.role)){
-        throw new ApiError(400,"You are not authorised to access assigned incidents")
+const getMyAssignedIncidents = asyncHandler(async (req, res) => {
+    if (!["support", "senior_support", "team_lead"].includes(req.user.role)) {
+        throw new ApiError(400, "You are not authorised to access assigned incidents")
     };
 
-    const {status,priority} = req.query;
+    const { status, priority } = req.query;
     const query = {};
     query.assignedTo = req.user._id;   //or this is also right -> const query = { assignedTo: req.user._id };
-    if(status) query.status = status;
-    if(priority) query.priority = priority;
+    if (status) query.status = status;
+    if (priority) query.priority = priority;
 
     const incidents = await Incident.find(query)
-        .populate("createdBy","name email")
+        .populate("createdBy", "name email")
         .lean();   //Use .lean() for better performance (since we’re only reading data).
 
-    if(incidents.length === 0){
+    if (incidents.length === 0) {
         return res.status(200).json(
             new ApiResponse(200, incidents, "No incidents found!")
         );
     };
 
     return res.status(200).json(
-        new ApiResponse(200,incidents,"My-assigned incidents fetched successfully!")
+        new ApiResponse(200, incidents, "My-assigned incidents fetched successfully!")
     );
 })
 
-const getMyEscalatedOrSlaBreached = asyncHandler(async (req,res) => {
-    if(!["support","senior_support","team_lead"].includes(req.user.role)){
-        throw new ApiError(400,"You are not authorised to access escalated or SLA-breached incidents")
+const getMyEscalatedOrSlaBreached = asyncHandler(async (req, res) => {
+    if (!["support", "senior_support", "team_lead"].includes(req.user.role)) {
+        throw new ApiError(400, "You are not authorised to access escalated or SLA-breached incidents")
     };
 
     const roleLevelMap = {
@@ -310,19 +310,19 @@ const getMyEscalatedOrSlaBreached = asyncHandler(async (req,res) => {
     const incidents = await Incident.find({
         assignedTo: req.user._id,
         $or: [
-            {escalationLevel: {$gt: currentSupportLevel}},
-            {dueAt: {$lt: currentTime}}
+            { escalationLevel: { $gt: currentSupportLevel } },
+            { dueAt: { $lt: currentTime } }
         ]
-    }).populate("createdBy","name email").lean();
+    }).populate("createdBy", "name email").lean();
 
-    if(incidents.length === 0){
+    if (incidents.length === 0) {
         return res.status(200).json(
             new ApiResponse(200, incidents, "No incidents found!")
         );
     };
 
     return res.status(200).json(
-        new ApiResponse(200,incidents,"Escalated or SLA-breached incidents fetched successfully!")
+        new ApiResponse(200, incidents, "Escalated or SLA-breached incidents fetched successfully!")
     );
 })
 
@@ -333,12 +333,12 @@ const getMyResolvedOrClosedIncidents = asyncHandler(async (req, res) => {
 
     const incidents = await Incident.find({
         $or: [
-            { assignedTo: req.user._id, status: "resolved" },            
+            { assignedTo: req.user._id, status: "resolved" },
             { assignedTo: req.user._id, status: "closed" }  //Closed but was previously assigned to this user
         ]
     })
-    .populate("createdBy", "name email")
-    .lean();
+        .populate("createdBy", "name email")
+        .lean();
 
     if (incidents.length === 0) {
         return res.status(200).json(
@@ -355,81 +355,81 @@ const getMyResolvedOrClosedIncidents = asyncHandler(async (req, res) => {
 
 const getSupportDashboard = asyncHandler(async (req, res) => {
     if (!["support", "senior_support", "team_lead"].includes(req.user.role)) {
-      throw new ApiError(400, "You are not authorised to view support dashboard data");
+        throw new ApiError(400, "You are not authorised to view support dashboard data");
     }
-  
+
     const userId = req.user._id;
     const now = new Date();
     const baseQuery = { assignedTo: userId };
-  
+
     const [
-      assignedToMe,
-      inProgress,
-      resolved,
-      slaBreached,
-      byPriorityAgg,
-      byCategoryAgg,
-      resolvedTrendAgg,
+        assignedToMe,
+        inProgress,
+        resolved,
+        slaBreached,
+        byPriorityAgg,
+        byCategoryAgg,
+        resolvedTrendAgg,
     ] = await Promise.all([
-      Incident.countDocuments(baseQuery),
-      Incident.countDocuments({ ...baseQuery, status: "in-progress" }),
-      Incident.countDocuments({ ...baseQuery, status: "resolved" }),
-      Incident.countDocuments({
-        ...baseQuery,
-        dueAt: { $lt: now },
-        status: { $ne: "closed" },
-      }),
-      Incident.aggregate([
-        { $match: baseQuery },
-        { $group: { _id: "$priority", count: { $sum: 1 } } },
-      ]),
-      Incident.aggregate([
-        { $match: baseQuery },
-        { $group: { _id: "$category", count: { $sum: 1 } } },
-      ]),
-      Incident.aggregate([
-        {
-          $match: {
+        Incident.countDocuments(baseQuery),
+        Incident.countDocuments({ ...baseQuery, status: "in-progress" }),
+        Incident.countDocuments({ ...baseQuery, status: "resolved" }),
+        Incident.countDocuments({
             ...baseQuery,
-            status: { $in: ["resolved", "closed"] },
-            resolvedAt: { $exists: true },
-          },
-        },
-        {
-          $group: {
-            _id: {
-              year: { $year: "$resolvedAt" },
-              week: { $isoWeek: "$resolvedAt" },
+            dueAt: { $lt: now },
+            status: { $ne: "closed" },
+        }),
+        Incident.aggregate([
+            { $match: baseQuery },
+            { $group: { _id: "$priority", count: { $sum: 1 } } },
+        ]),
+        Incident.aggregate([
+            { $match: baseQuery },
+            { $group: { _id: "$category", count: { $sum: 1 } } },
+        ]),
+        Incident.aggregate([
+            {
+                $match: {
+                    ...baseQuery,
+                    status: { $in: ["resolved", "closed"] },
+                    resolvedAt: { $exists: true },
+                },
             },
-            count: { $sum: 1 },
-          },
-        },
-        { $sort: { "_id.year": 1, "_id.week": 1 } },
-      ]),
+            {
+                $group: {
+                    _id: {
+                        year: { $year: "$resolvedAt" },
+                        week: { $isoWeek: "$resolvedAt" },
+                    },
+                    count: { $sum: 1 },
+                },
+            },
+            { $sort: { "_id.year": 1, "_id.week": 1 } },
+        ]),
     ]);
-  
+
     const byPriority = byPriorityAgg.map(p => ({ name: p._id || "unknown", value: p.count }));
     const byCategory = byCategoryAgg.map(c => ({ name: c._id || "unknown", value: c.count }));
     const resolvedTrend = resolvedTrendAgg.map(r => ({
-      week: `${r._id.year}-W${String(r._id.week).padStart(2, "0")}`,
-      count: r.count,
+        week: `${r._id.year}-W${String(r._id.week).padStart(2, "0")}`,
+        count: r.count,
     }));
-  
-    return res.status(200).json(
-      new ApiResponse(
-        200,
-        {
-          kpis: { assignedToMe, inProgress, resolved, slaBreached },
-          byPriority,
-          byCategory,
-          resolvedTrend,
-        },
-        "Support dashboard data fetched successfully!"
-      )
-    );
-  });
 
-export { getAllUsers, updatePassword, changeRole, assignDepartment, getOverview, getCountByPriority, getAvgResolutionTime, getActiveAndClosedIncidents, getMyAssignedIncidents, getMyEscalatedOrSlaBreached, getMyResolvedOrClosedIncidents, getSupportDashboard } 
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {
+                kpis: { assignedToMe, inProgress, resolved, slaBreached },
+                byPriority,
+                byCategory,
+                resolvedTrend,
+            },
+            "Support dashboard data fetched successfully!"
+        )
+    );
+});
+
+export { getAllUsers, updatePassword, changeRole, assignDepartment, getOverview, getCountByPriority, getAvgResolutionTime, getActiveAndClosedIncidents, getMyAssignedIncidents, getMyEscalatedOrSlaBreached, getMyResolvedOrClosedIncidents, getSupportDashboard }
 
 
 

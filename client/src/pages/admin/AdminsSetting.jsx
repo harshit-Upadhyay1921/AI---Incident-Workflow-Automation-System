@@ -39,9 +39,7 @@ const AdminSettings = () => {
     confirmPassword: "",
   });
 
-  // ---------------------------------------------------------
-  //                       API HANDLERS
-  // ---------------------------------------------------------
+
 
   // CHANGE ROLE
   const handleChangeRole = async (e) => {

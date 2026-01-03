@@ -35,11 +35,11 @@ const SupportDashboard = () => {
           { withCredentials: true }
         );
         const data = res.data.data;
-        
-        setKpis(data.kpis);
-        setPriorityData(data.byPriority);      // [{ name, value }]
-        setCategoryData(data.byCategory);      // [{ name, value }]
-        setTrendData(data.resolvedTrend);      // [{ week, count }]
+
+        setKpis(data.kpis || {});
+        setPriorityData(data.byPriority || []);
+        setCategoryData(data.byCategory || []);
+        setTrendData(data.resolvedTrend || []);       // [{ week, count }]
 
       } catch (error) {
         console.error("Support Dashboard Error:", error);

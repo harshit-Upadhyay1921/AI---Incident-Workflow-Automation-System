@@ -15,7 +15,11 @@ const auditLogSchema = new mongoose.Schema(
     changedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
+    },
+    changedBySystem: {
+      type: Boolean,
+      default: false
     },
     before: {
       type: Object, // Full snapshot before change
@@ -36,7 +40,7 @@ const auditLogSchema = new mongoose.Schema(
 );
 
 // Optional: Index for faster queries per incident
-auditLogSchema.index({ incidentId: 1, timestamp: -1 });   
+auditLogSchema.index({ incidentId: 1, timestamp: -1 });
 // MongoDB first filters by incidentId → then within those results it sorts by latest timestamp.
 // So you instantly get:
 // “all changes for this incident, newest first” without an additional sort.

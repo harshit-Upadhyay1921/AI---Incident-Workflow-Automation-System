@@ -27,14 +27,23 @@ const ActionsMenu = ({ incident, onClose }) => {
   }, []);
 
   // -------- ROLE-BASED VISIBILITY --------
+  const isCreator =
+    currentUser?._id?.toString() ===
+    incident?.createdBy?._id?.toString() ||
+    currentUser?._id?.toString() === incident?.createdBy?.toString();
+
+  const isAssignee =
+    currentUser?._id?.toString() ===
+    incident?.assignedTo?._id?.toString();
+
   const canViewHistory =
     role === "admin" ||
     role === "team_lead" ||
-    currentUser?._id === incident.createdBy ||
-    currentUser?._id === incident.assignedTo;
+    isCreator ||
+    isAssignee;
 
   const canClose =
-    role === "admin" || currentUser?._id === incident.createdBy;
+    role === "admin" || isCreator;
 
   const canReopen = role === "admin";
 

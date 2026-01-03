@@ -288,7 +288,9 @@ const getAllIncidents = asyncHandler(async (req, res) => {   //incidents //admin
     const incidents = await Incident.find(query)
         .sort({ [sortBy]: order === "asc" ? 1 : -1 })
         .skip((page - 1) * limit)
-        .limit(Number(limit));
+        .limit(Number(limit))
+        .populate("createdBy","name email")
+        .populate("assignedTo","name email");
 
     const total = await Incident.countDocuments(query);
 
@@ -330,7 +332,9 @@ const getMyCreatedIncidents = asyncHandler(async (req, res) => {
     const myIncidents = await Incident.find(query)
         .sort({ [sortBy]: order === "asc" ? 1 : -1 })
         .skip((page - 1) * limit)
-        .limit(Number(limit));
+        .limit(Number(limit))
+        .populate("createdBy","name email")
+        .populate("assignedTo","name email");
 
     const total = await Incident.countDocuments(query);
 

@@ -48,14 +48,14 @@ const TeamLeadCreateInc = () => {
 
     try {
       // TODO: Uncomment when backend preview endpoint is ready
-      const res = await api.post("/v1/incidents/autoClassifyIncident",{
+      const res = await api.post("/v1/incidents/autoClassifyIncident", {
         title: form.title,
         description: form.description,
       },
-      {
-        withCredentials: true,
-      }
-    )
+        {
+          withCredentials: true,
+        }
+      )
       const previewData = res.data.data;
       setAutoData({
         category: previewData.category,
@@ -93,17 +93,21 @@ const TeamLeadCreateInc = () => {
     setLoadingCreate(true);
 
     try {
-      const res = await api.post("/v1/incidents/createIncident",{
+      const res = await api.post("/v1/incidents/createIncident", {
         title: form.title,
         description: form.description,
         category: autoData.category,
         priority: autoData.priority,
         status: autoData.status,
-        assignedTo: autoData.assignedTo,
+        assignedTo:
+          typeof autoData.assignedTo === "object"
+            ? autoData.assignedTo?._id
+            : autoData.assignedTo,
         assignedDept: autoData.assignedDept,
         dueAt: autoData.dueAt,
         nextEscalationAt: autoData.nextEscalationAt,
       });
+
       const createdIncident = res.data.data;
       // Optional manual department override using changeAssignDeptManual controller.
       // Backend will also recalculate assignedTo for the new department.
@@ -111,12 +115,12 @@ const TeamLeadCreateInc = () => {
         await api.post(`/v1/incidents/changeAssignDeptManual/${createdIncident._id}`, {
           newDept: manualDept
         },
-        {
-          withCredentials: true
-        }
-      )
+          {
+            withCredentials: true
+          }
+        )
       }
-      
+
       alert("Incident created successfully!");
       navigate("../incidents");
 
@@ -309,7 +313,7 @@ const TeamLeadCreateInc = () => {
             />
             <AutoField
               label="Assigned To"
-              value={autoData.assignedTo}
+              value={typeof autoData.assignedTo === "object" ? autoData.assignedTo?.name : autoData.assignedTo}
               icon="👤"
               isEmpty={!autoData.assignedTo}
             />
@@ -365,11 +369,10 @@ const AutoField = ({ label, value, icon, isEmpty, className = "" }) => {
         <span>{label}</span>
       </label>
       <div
-        className={`px-4 py-3 rounded-lg border transition ${
-          isEmpty
+        className={`px-4 py-3 rounded-lg border transition ${isEmpty
             ? "bg-white border-gray-200 text-gray-400"
             : "bg-white border-primary/30 text-gray-800 font-medium shadow-sm"
-        }`}
+          }`}
       >
         {isEmpty ? (
           <span className="italic">Not classified yet</span>

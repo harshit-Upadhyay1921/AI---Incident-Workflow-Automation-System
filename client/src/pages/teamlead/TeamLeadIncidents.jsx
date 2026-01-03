@@ -264,10 +264,10 @@ const TeamLeadIncidents = () => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
-                                                {typeof inc.createdBy === "object" ? inc.createdBy.name : inc.createdBy}
+                                                {inc.createdBy?.name || inc.createdBy || "—"}
                                             </td>
                                             <td className="px-6 py-4 text-gray-700">
-                                                {typeof inc.assignedTo === "object" ? inc.assignedTo.name : inc.assignedTo}
+                                                {inc.assignedTo?.name || inc.assignedTo || "—"}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">

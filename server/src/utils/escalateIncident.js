@@ -18,12 +18,8 @@ export const escalateIncident = async (incident) => {
         const nextLevel = incident.escalationLevel + 1;
         const nextRole = escalationFlow[nextLevel];
 
-        // const nextAssignee = await User.findOne({
-        //     role: nextRole,
-        //     department: incident.assignedDept
-        // });
         const nextAssignee = await getLeastLoadedSupportAgent(nextRole, incident.assignedDept);
-
+    
         const before = incident.toObject();
 
         incident.escalationLevel = nextLevel;
@@ -46,7 +42,7 @@ export const escalateIncident = async (incident) => {
         await recordAuditLog({
             incidentId: incident._id,
             action: "escalated",
-            changedBy: "system",
+            changeBySystem: true,
             before,
             after: incident
         });

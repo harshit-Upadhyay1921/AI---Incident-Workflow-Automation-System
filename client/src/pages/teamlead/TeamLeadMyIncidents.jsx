@@ -230,7 +230,7 @@ const TeamLeadMyIncidents = () => {
                   <th className="px-6 py-4 font-semibold text-gray-700">Priority</th>
                   <th className="px-6 py-4 font-semibold text-gray-700">Status</th>
                   <th className="px-6 py-4 font-semibold text-gray-700">Assigned To</th>
-                  <th className="px-6 py-4 font-semibold text-gray-700">Dept</th>
+                  <th className="px-6 py-4 font-semibold text-gray-700">Assigned Dept</th>
                   <th className="px-6 py-4 font-semibold text-gray-700">Created At</th>
                   <th className="px-6 py-4 font-semibold text-gray-700">Last Updated</th>
                   <th className="px-6 py-4 font-semibold text-gray-700 text-center">Actions</th>
@@ -277,7 +277,7 @@ const TeamLeadMyIncidents = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-gray-700">
-                        {typeof inc.assignedTo === "object" ? inc.assignedTo.name : inc.assignedTo}
+                        {inc.assignedTo?.name || inc.assignedTo || "—"}
                       </td>
                       <td className="px-6 py-4">
                         <span className="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">

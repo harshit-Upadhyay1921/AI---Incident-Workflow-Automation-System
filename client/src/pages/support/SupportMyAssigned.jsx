@@ -198,7 +198,7 @@ const SupportMyAssigned = () => {
                       </td>
 
                       <td className="px-6 py-4 text-gray-700">
-                        {inc.createdBy?.name}
+                        {inc.createdBy?.name || inc.createdBy || "—"}
                       </td>
 
                       <td className="px-6 py-4 text-gray-600 text-xs">

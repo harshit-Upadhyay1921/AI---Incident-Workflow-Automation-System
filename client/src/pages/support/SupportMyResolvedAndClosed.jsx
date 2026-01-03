@@ -122,7 +122,7 @@ const SupportMyResolvedAndClosed = () => {
                   <th className="px-6 py-4 font-semibold">Priority</th>
                   <th className="px-6 py-4 font-semibold">Status</th>
                   <th className="px-6 py-4 font-semibold">Created By</th>
-                  <th className="px-6 py-4 font-semibold">Dept</th>
+                  <th className="px-6 py-4 font-semibold">Assigned Dept</th>
                   <th className="px-6 py-4 font-semibold">Created At</th>
                   <th className="px-6 py-4 font-semibold">Updated At</th>
                   <th className="px-6 py-4 font-semibold text-center">Actions</th>
@@ -168,7 +168,7 @@ const SupportMyResolvedAndClosed = () => {
                         </span>
                       </td>
 
-                      <td className="px-6 py-4">{inc.createdBy.name}</td>
+                      <td className="px-6 py-4">{inc.createdBy?.name || inc.createdBy || "—"} </td>
 
                       <td className="px-6 py-4">
                         <span className="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
