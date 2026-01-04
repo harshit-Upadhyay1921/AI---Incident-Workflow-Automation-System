@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.models.js";
 import { Incident } from "../models/incident.models.js";
-import { escalateIncident } from "../utils/escalateIncident.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const updatePassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body
@@ -19,6 +19,33 @@ const updatePassword = asyncHandler(async (req, res) => {
     await user.save({ validateBeforeSave: false })
 
     return res.status(200).json(new ApiResponse(200, {}, "Password changed successfully"))
+})
+
+const updateAvatar = asyncHandler(async (req,res) => {
+    if(!req.file){
+        throw new ApiError(400,"Image file is required!")
+    }
+    const response = await uploadOnCloudinary(req.file);
+    if(!response?.secure_url){
+        throw new ApiError(500,"Avatar upload failed!")
+    }
+
+    const user = await User.findById(req.user._id).select("-password -refreshToken");
+    if(!user){
+        throw new ApiError(404,"user not found, avatar upload failed")
+    }
+
+    user.avatar = response.secure_url;
+
+    await user.save();
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            user,
+            "Avatar updated successfully!"
+        )
+    )
 })
 
 //admin APIs
@@ -439,7 +466,7 @@ const getSupportDashboard = asyncHandler(async (req, res) => {
     );
 });
 
-export { getAllUsers, updatePassword, changeRole, assignDepartment, getOverview, getCountByPriority, getAvgResolutionTime, getActiveAndClosedIncidents, getMyAssignedIncidents, getMyEscalatedOrSlaBreached, getMyResolvedOrClosedIncidents, getSupportDashboard }
+export { getAllUsers, updatePassword, updateAvatar, changeRole, assignDepartment, getOverview, getCountByPriority, getAvgResolutionTime, getActiveAndClosedIncidents, getMyAssignedIncidents, getMyEscalatedOrSlaBreached, getMyResolvedOrClosedIncidents, getSupportDashboard }
 
 
 

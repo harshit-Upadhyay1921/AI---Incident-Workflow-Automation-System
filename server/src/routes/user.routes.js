@@ -3,6 +3,7 @@ import {Router} from "express";
 import {
     getAllUsers, 
     updatePassword, 
+    updateAvatar,
     changeRole, 
     assignDepartment, 
     getOverview, 
@@ -17,11 +18,13 @@ import {
 
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.middlewares.js";
+import { upload } from "../middlewares/multer.middlewares.js";
 
 const router = Router();
 
 router.route("/getAllUsers").get(verifyJWT,authorizeRoles("admin","team_lead"),getAllUsers);
 router.route("/updatePassword").post(verifyJWT,updatePassword);
+router.route("/updateAvatar").post(verifyJWT,upload.single("avatar"),updateAvatar);
 router.route("/changeRole/:id").post(verifyJWT,authorizeRoles("admin"),changeRole);
 router.route("/assignDepartment/:id").post(verifyJWT,authorizeRoles("admin"),assignDepartment);
 router.route("/getOverview").get(verifyJWT,authorizeRoles("admin","team_lead"),getOverview);
