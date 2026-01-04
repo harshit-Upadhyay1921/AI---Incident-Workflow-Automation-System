@@ -22,10 +22,12 @@ const updatePassword = asyncHandler(async (req, res) => {
 })
 
 const updateAvatar = asyncHandler(async (req,res) => {
-    if(!req.file){
-        throw new ApiError(400,"Image file is required!")
+    const avatarLocalPath = req.file?.path;
+    if (!avatarLocalPath) {
+        throw new ApiError(400, "Avatar Path is missing")
     }
-    const response = await uploadOnCloudinary(req.file);
+    const response = await uploadOnCloudinary(avatarLocalPath);
+    
     if(!response?.secure_url){
         throw new ApiError(500,"Avatar upload failed!")
     }
