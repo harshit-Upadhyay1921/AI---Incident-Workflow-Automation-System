@@ -77,7 +77,7 @@ const loginUser = asyncHandler(async (req,res) => {
     const options = {    //
         httpOnly: true,
         secure: true,
-        sameSite: "strict"
+        sameSite: "none"  // Changed to "none" for cross-origin (Vercel to Render)
     }
 
     return res.
@@ -110,7 +110,7 @@ const logoutUser = asyncHandler(async (req,res) => {
     const options= {
         httpOnly: true,
         secure: true,
-        sameSite: "strict"
+        sameSite: "none"  // Changed to "none" for cross-origin (Vercel to Render)
     }
 
     return res.status(200)
@@ -139,7 +139,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {    // this api is 
         const options = {
             httpOnly: true,
             secure: true,
-            sameSite: "strict"
+            sameSite: "none"  // Changed to "none" for cross-origin (Vercel to Render)
         };
 
         return res
