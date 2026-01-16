@@ -6,9 +6,21 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
   process.env.CORS_ORIGIN,
-];
+  "https://incidentiq.vercel.app",
+  // Add any other preview URLs if needed
+].filter(Boolean); // Remove undefined values
+
 app.use(cors({
-    origin: allowedOrigins[1],
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }))
 app.use(express.json());
