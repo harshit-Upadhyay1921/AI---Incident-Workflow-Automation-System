@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.models.js";
 import { Incident } from "../models/incident.models.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { AuditLog } from "../models/auditLog.models.js";
 
 const updatePassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body
@@ -345,7 +346,7 @@ const getMyEscalatedOrSlaBreached = asyncHandler(async (req, res) => {
     const currentSupportLevel = roleLevelMap[req.user.role];
     const currentTime = new Date();
 
-    const incidents = await Incident.find({
+    const currentIncidents = await Incident.find({
         assignedTo: req.user._id,
         $or: [
             { escalationLevel: { $gt: currentSupportLevel } },
@@ -353,14 +354,31 @@ const getMyEscalatedOrSlaBreached = asyncHandler(async (req, res) => {
         ]
     }).populate("createdBy", "name email").populate("assignedTo", "name email").lean();
 
-    if (incidents.length === 0) {
+    if (currentIncidents.length === 0) {
         return res.status(200).json(
-            new ApiResponse(200, incidents, "No incidents found!")
+            new ApiResponse(200, currentIncidents, "No incidents found!")
         );
     };
 
+    const escalatedFromMe = await AuditLog.find({
+        action: "escalated",
+        "before.assignedTo": req.user._id.toString() 
+    }).distinct("incidentId");
+
+    const escalatedIncidents = await Incident.find({
+        _id: { $in: escalatedFromMe},
+        $or: [
+            { escalationLevel: { $gt: currentSupportLevel }},
+            { dueAt: { $lt: currentTime }}
+        ]
+    }).populate("createdBy", "name email").populate("assignedTo", "name email").lean();
+
+    //combine and remove duplicates
+    const allIncidents = [...currentIncidents, ...escalatedIncidents];
+    const allUniqueIncidents = Array.from(new Map(allIncidents.map(i => [i._id.toString(), i])).values());
+
     return res.status(200).json(
-        new ApiResponse(200, incidents, "Escalated or SLA-breached incidents fetched successfully!")
+        new ApiResponse(200, allUniqueIncidents, "Escalated or SLA-breached incidents fetched successfully!")
     );
 })
 

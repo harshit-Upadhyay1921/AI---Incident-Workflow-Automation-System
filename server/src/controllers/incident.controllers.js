@@ -358,15 +358,15 @@ const getIncidentHistory = asyncHandler(async (req, res) => {
     const incidentId = req.params.id;
     if (!incidentId) throw new ApiError(400, "Incident id is required!");
 
+    const incident = await Incident.findById(incidentId);
+    if (!incident) throw new ApiError(404, "Incident not found!");
+
     const isAdminOrTeamlead = ["admin", "team_lead"].includes(req.user.role);
-    const isCreatorOrAssignee = req.user._id.toString() === incident.createdBy.toString() || req.user._id.toString() === incident.assignedTo.toString();
+    const isCreatorOrAssignee = req.user._id.toString() === incident.createdBy.toString() || (incident.assignedTo && req.user._id.toString() === incident.assignedTo.toString());
 
     if (!isAdminOrTeamlead && !isCreatorOrAssignee) {
         throw new ApiError(400, "You are not authorized to view the history")
     };
-
-    const incident = await Incident.findById(incidentId);
-    if (!incident) throw new ApiError(404, "Incident not found!");
 
     const incidentHistory = await AuditLog.find({ incidentId })
         .populate("changedBy", "name role")

@@ -33,26 +33,94 @@ const IncidentHistory = ({ incidentId, onClose }) => {
     });
 
   const renderDiff = (before = {}, after = {}) => {
+    // Fields to ignore (Mongoose metadata)
+    const ignoreFields = ['_id', '__v', 'createdAt', 'updatedAt', 'timestamp'];
+
+    // Fields that are ObjectIds - we need to handle them specially
+    const objectIdFields = ['assignedTo', 'createdBy'];
+
+    // Human-readable field labels
+    const fieldLabels = {
+      status: 'Status',
+      priority: 'Priority',
+      category: 'Category',
+      assignedTo: 'Assigned To',
+      assignedDept: 'Assigned Department',
+      escalationLevel: 'Escalation Level',
+      title: 'Title',
+      description: 'Description',
+      dueAt: 'Due Date',
+      nextEscalationAt: 'Next Escalation',
+      resolvedAt: 'Resolved At'
+    };
+
     const keys = new Set([
       ...Object.keys(before || {}),
       ...Object.keys(after || {}),
     ]);
 
-    return [...keys]
-      .filter((key) => before?.[key] !== after?.[key])
-      .map((key) => (
-        <div key={key} className="grid grid-cols-3 gap-2 text-xs">
-          <div className="text-gray-400 font-medium">{key}</div>
-          <div className="text-red-600">
-            {before?.[key] ?? "—"}
-          </div>
-          <div className="text-green-700 font-medium">
-            {after?.[key] ?? "—"}
-          </div>
-        </div>
-      ));
-  };
+    const changes = [...keys]
+      .filter(key => !ignoreFields.includes(key))
+      .filter(key => {
+        const beforeVal = before?.[key];
+        const afterVal = after?.[key];
 
+        // Handle ObjectIds
+        if (objectIdFields.includes(key)) {
+          const beforeStr = beforeVal?._id ? beforeVal._id.toString() : beforeVal?.toString() || null;
+          const afterStr = afterVal?._id ? afterVal._id.toString() : afterVal?.toString() || null;
+          return beforeStr !== afterStr;
+        }
+
+        // Handle dates
+        if (beforeVal instanceof Date || afterVal instanceof Date) {
+          const beforeDate = beforeVal ? new Date(beforeVal).toISOString() : null;
+          const afterDate = afterVal ? new Date(afterVal).toISOString() : null;
+          return beforeDate !== afterDate;
+        }
+
+        return beforeVal !== afterVal;
+      });
+
+    if (changes.length === 0) {
+      return <div className="text-gray-500 text-xs italic">No changes</div>;
+    }
+
+    return (
+      <div className="space-y-2">
+        {changes.map((key) => {
+          let beforeVal = before?.[key];
+          let afterVal = after?.[key];
+
+          // Format ObjectIds
+          if (objectIdFields.includes(key)) {
+            beforeVal = beforeVal?._id ? beforeVal._id.toString() : beforeVal?.toString() || null;
+            afterVal = afterVal?._id ? afterVal._id.toString() : afterVal?.toString() || null;
+          }
+
+          // Format dates
+          if (beforeVal instanceof Date || afterVal instanceof Date) {
+            beforeVal = beforeVal ? new Date(beforeVal).toLocaleString() : null;
+            afterVal = afterVal ? new Date(afterVal).toLocaleString() : null;
+          }
+
+          // Handle null/undefined
+          beforeVal = beforeVal ?? "—";
+          afterVal = afterVal ?? "—";
+
+          return (
+            <div key={key} className="text-xs border-l-2 border-primary/20 pl-2 py-1">
+              <span className="font-medium text-gray-700">{fieldLabels[key] || key}:</span>
+              <div className="mt-0.5">
+                <span className="text-red-600 line-through mr-2">{String(beforeVal)}</span>
+                <span className="text-green-700 font-medium">→ {String(afterVal)}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     /* ---------- BACKDROP ---------- */
@@ -104,10 +172,14 @@ const IncidentHistory = ({ incidentId, onClose }) => {
                     </td>
 
                     <td className="px-4 py-3">
-                      {log.changedBy.name}
-                      <div className="text-xs text-gray-500">
-                        {log.changedBy.role}
-                      </div>
+                      {log.changedBy ? (
+                        <>
+                          {log.changedBy.name}
+                          <div className="text-xs text-gray-500">{log.changedBy.role}</div>
+                        </>
+                      ) : (
+                        <span className="text-xs text-gray-400 italic">System</span>
+                      )}
                     </td>
 
                     <td className="px-4 py-3">
