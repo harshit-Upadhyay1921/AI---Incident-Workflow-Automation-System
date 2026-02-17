@@ -1,19 +1,6 @@
 <h1 align="center">🚀 IncidentIQ</h1>
 <p align="center"> <b>AI-Powered ITSM Workflow Automation Platform</b><br/> Intelligent Incident Management • Smart Assignment • SLA Escalation Engine </p> <p align="center"> <a href="https://incidentiq.vercel.app"><b>🌐 Live Demo</b></a> </p>
 
-🏷 Badges
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 🧠 What is IncidentIQ?
