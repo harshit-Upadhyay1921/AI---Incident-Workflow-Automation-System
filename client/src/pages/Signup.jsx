@@ -10,13 +10,14 @@ const Signup = () => {
   const [role, setRole] = useState("employee");
   const [department, setDepartment] = useState("IT");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setIsSubmitting(true);
     try {
       const res = await api.post("/v1/auth/register", {
         name,
@@ -41,6 +42,8 @@ const Signup = () => {
     } catch (error) {
       console.error("Registration failed:", error);
       alert("Somethin went wrong!");
+    } finally {
+      setIsSubmitting(false);
     }
 
   }
@@ -169,9 +172,17 @@ const Signup = () => {
               {/* SUBMIT BUTTON */}
               <button
                 type="submit"
-                className="w-full py-3 bg-primary text-white rounded-lg font-semibold hover:bg-[#053B2C] transition"
+                disabled={isSubmitting}
+                aria-busy={isSubmitting}
+                className="w-full py-3 bg-primary text-white rounded-lg font-semibold hover:bg-[#053B2C] transition disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Create Account
+                {isSubmitting && (
+                  <span
+                    className="inline-block h-5 w-5 border-2 border-white/40 border-t-white rounded-full animate-spin"
+                    aria-hidden
+                  />
+                )}
+                {isSubmitting ? "Creating account…" : "Create Account"}
               </button>
             </form>
           </div>

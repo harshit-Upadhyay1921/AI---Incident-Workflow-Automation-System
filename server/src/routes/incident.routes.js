@@ -28,7 +28,7 @@ router.route("/reopenIncident/:id").post(verifyJWT,authorizeRoles("admin"),reope
 
 router.route("/getAllIncidents").get(verifyJWT,authorizeRoles("admin","team_lead"),getAllIncidents);
 router.route("/getMyCreatedIncidents").get(verifyJWT,getMyCreatedIncidents);
-router.route("/getIncidentHistory/:id").get(verifyJWT,authorizeRoles("admin","team_lead"),getIncidentHistory);
+router.route("/getIncidentHistory/:id").get(verifyJWT,getIncidentHistory);
 router.route("/getIncidentDetails/:id").get(verifyJWT,getIncidentDetails);
 
 export default router

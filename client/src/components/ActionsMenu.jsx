@@ -43,9 +43,9 @@ const ActionsMenu = ({ incident, onClose }) => {
     isAssignee;
 
   const canClose =
-    role === "admin" || isCreator;
+    role === "admin" || (isCreator && incident.status === "resolved");
 
-  const canReopen = role === "admin";
+  const canReopen = role === "admin" && (incident.status === "closed" || incident.status === "resolved");
 
   // -------- ACTION HANDLERS --------
   // const viewHistory = () => {                        //no need to navigate

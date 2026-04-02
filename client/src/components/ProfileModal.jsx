@@ -31,14 +31,8 @@ export const ProfileModal = ({ open, onClose }) => {
 
     try {
       setUploading(true);
-      const res = await api.post(
-        "/v1/users/updateAvatar",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
-        }
-      );
+      // Let Axios set multipart boundary automatically — a manual Content-Type breaks some uploads.
+      const res = await api.post("/v1/users/updateAvatar", formData);
       alert("Profile picture updated");
       window.location.reload(); // simplest + safe
     } catch (err) {

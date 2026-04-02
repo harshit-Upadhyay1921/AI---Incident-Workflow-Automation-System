@@ -10,12 +10,13 @@ const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setIsSubmitting(true);
     try {
       const res = await api.post("/v1/auth/login", {
         email,
@@ -38,6 +39,8 @@ const Login = () => {
     catch (error) {
       console.error("Login failed:", error);
       alert("Invalid email or password!");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -48,7 +51,7 @@ const Login = () => {
         {/* LEFT SIDE TEXT */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }} a
+          animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
           className="flex-1 space-y-6"
         >
@@ -107,9 +110,17 @@ const Login = () => {
               {/* LOGIN BUTTON */}
               <button
                 type="submit"
-                className="w-full py-3 bg-primary text-white rounded-lg font-semibold hover:bg-[#053B2C] transition"
+                disabled={isSubmitting}
+                aria-busy={isSubmitting}
+                className="w-full py-3 bg-primary text-white rounded-lg font-semibold hover:bg-[#053B2C] transition disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Login
+                {isSubmitting && (
+                  <span
+                    className="inline-block h-5 w-5 border-2 border-white/40 border-t-white rounded-full animate-spin"
+                    aria-hidden
+                  />
+                )}
+                {isSubmitting ? "Signing in…" : "Login"}
               </button>
             </form>
 

@@ -122,7 +122,7 @@ const TeamLeadCreateInc = () => {
       }
 
       alert("Incident created successfully!");
-      navigate("../incidents");
+      navigate("/team_lead/myIncidents");
 
     } catch (err) {
       console.error("Create Incident Error:", err);
