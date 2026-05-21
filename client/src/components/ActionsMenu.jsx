@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import IncidentHistory from "../pages/IncidentHistory.jsx";
+import api from "../api/api.js";
+
 
 const ActionsMenu = ({ incident, onClose }) => {
   const { currentUser } = useAuth();
