@@ -53,16 +53,70 @@ const ActionsMenu = ({ incident, onClose }) => {
   //   onClose();
   // };
 
+  // ... existing code ...
+  const [loading, setLoading] = useState(false);
+
+  // -------- ACTION HANDLERS --------
+
   const closeIncident = async () => {
-    // await axios.patch(`/api/incidents/${incident._id}/close`);
-    alert("Close Incident API Placeholder");
-    onClose();
+    if (!incident?._id) return;
+    
+    setLoading(true);
+    try {
+      const response = await api.post(`/closeIncident/${incident._id}`);
+      
+      // Show success message
+      alert("Incident closed successfully!");
+      
+      // Notify parent component about the change
+      if (typeof onClose === 'function') {
+        onClose();
+      }
+      
+      // Optional: You might want to refresh the incident list or update local state
+      // This would depend on how the parent component handles updates
+      
+    } catch (error) {
+      console.error("Error closing incident:", error);
+      let errorMessage = "Failed to close incident";
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const reopenIncident = async () => {
-    // await axios.patch(`/api/incidents/${incident._id}/reopen`);
-    alert("Reopen Incident API Placeholder");
-    onClose();
+    if (!incident?._id) return;
+    
+    setLoading(true);
+    try {
+      const response = await api.post(`/reopenIncident/${incident._id}`);
+      
+      // Show success message
+      alert("Incident reopened successfully!");
+      
+      // Notify parent component about the change
+      if (typeof onClose === 'function') {
+        onClose();
+      }
+      
+    } catch (error) {
+      console.error("Error reopening incident:", error);
+      let errorMessage = "Failed to reopen incident";
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
